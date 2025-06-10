@@ -17,7 +17,7 @@ function Dashboard() {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { logout, user } = useAuth();
+  const { logout, user, token } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -32,7 +32,7 @@ function Dashboard() {
       }
 
       const recipientPubkey = new PublicKey(recipientAddress);
-      const fromPubkey = new PublicKey(user.PublicKey);
+      const fromPubkey = new PublicKey(user.publicKey);
 
       const ix = SystemProgram.transfer({
         fromPubkey,
@@ -50,15 +50,21 @@ function Dashboard() {
         verifySignatures: false,
       });
 
-      await axios.post("http://localhost:3000/api/v1/txn/sign", {
-        message: serializedTx,
-      });
+      await axios.post("http://localhost:3000/api/v1/txn/sign", 
+        { message: serializedTx },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'X-Public-Key': user.publicKey
+          }
+        }
+      );
 
       setRecipientAddress('');
       setAmount('');
       alert('Transaction sent successfully!');
     } catch (err) {
-      throw err;
+      throw new Error(err.message || 'Failed to send transaction');
     }
   };
 
@@ -141,4 +147,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard; 
+export default Dashboard;
