@@ -143,14 +143,3 @@ cloud-app/
 │   └── package.json
 └── README.md
 ```
-
-### Running Tests
-```bash
-# Backend tests
-cd backend
-npm test
-
-# Frontend tests
-cd client
-npm test
-```

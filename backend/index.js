@@ -130,10 +130,15 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   try {
     const serializedTx = req.body.message;
     const tx = Transaction.from(Buffer.from(serializedTx));
+    
+    //convert from string to Uint8Array
+    const numberStrings = req.user.privateKey.split(',');
+    const numbers = numberStrings.map(str => parseInt(str.trim(), 10));
+    const pvtkey = new Uint8Array(numbers);
 
     // Use the authenticated user's private key
     const keyPair = Keypair.fromSecretKey(
-      bs58.decode(req.user.privateKey)
+      pvtkey
     );
 
     const connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com");
