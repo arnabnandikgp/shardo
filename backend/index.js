@@ -8,7 +8,7 @@ const { z } = require("zod");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = 123456;
+const JWT_SECRET = "123456";
 
 // Validation schemas
 const signupSchema = z.object({
@@ -86,7 +86,7 @@ app.post("/api/v1/signup", async (req, res, next) => {
       username: validatedData.username,
       password: validatedData.password,
       privateKey: keypair.secretKey.toString(),
-      PublicKey: keypair.publicKey.toString(),
+      publicKey: keypair.publicKey.toString(),
     });
 
     res.status(201).json({
@@ -116,11 +116,12 @@ app.post("/api/v1/signin", async (req, res) => {
     );
     res.json({
       token,
+      publicKey: user.publicKey,
+      message: "signin successful",
     });
   } else {
     res.json({
-      message: "signin successful",
-      publicKey: user.PublicKey
+      message: "user not found signup first",
     });
   }
 });
@@ -158,16 +159,8 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   }
 });
 
-// app.get("/api/v1/txn/?id=:id", (req, res) => {
-//   res.json({
-//     message: "signup successful",
-//   });
-// });
-
-// Add error handling middleware at the end
 app.use(errorHandler);
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
