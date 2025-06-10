@@ -119,13 +119,6 @@ The application should now be running at:
 ### Transactions
 - `POST /api/v1/txn/sign` - Sign and send transaction
 
-## Security Considerations
-
-- All API endpoints except signup and signin require JWT authentication
-- Private keys are stored securely in the database
-- Password requirements enforce strong security
-- CORS is enabled for development purposes
-
 ## Development
 
 ### Project Structure
