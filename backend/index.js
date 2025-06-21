@@ -1,8 +1,14 @@
 const { userModel } = require("./models");
-const { Keypair, Transaction, Connection } = require("@solana/web3.js");
+const {
+  Keypair,
+  Transaction,
+  Connection,
+  VersionedTransaction,
+  MessageV0,
+} = require("@solana/web3.js");
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const bs58 = require('bs58');
+const bs58 = require("bs58");
 const cors = require("cors");
 const { z } = require("zod");
 
@@ -12,16 +18,24 @@ const JWT_SECRET = "123456";
 
 // Validation schemas
 const signupSchema = z.object({
-  username: z.string()
+  username: z
+    .string()
     .min(3, "Username must be at least 3 characters long")
     .max(30, "Username must be less than 30 characters")
-    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers and underscores"),
-  password: z.string()
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers and underscores"
+    ),
+  password: z
+    .string()
     .min(8, "Password must be at least 8 characters long")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character")
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Password must contain at least one special character"
+    ),
 });
 
 app.use(express.json());
@@ -32,20 +46,20 @@ const errorHandler = (err, req, res, next) => {
   if (err instanceof z.ZodError) {
     return res.status(400).json({
       error: "Validation Error",
-      details: err.errors
+      details: err.errors,
     });
   }
   res.status(500).json({
     error: "Internal Server Error",
-    message: err.message
+    message: err.message,
   });
 };
 
 // Authentication middleware
 const authenticateToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
     if (!token) {
       return res.status(401).json({ error: "Authentication token required" });
@@ -53,7 +67,7 @@ const authenticateToken = async (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await userModel.findById(decoded.id);
-    
+
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
@@ -72,12 +86,14 @@ app.post("/api/v1/signup", async (req, res, next) => {
   try {
     // Validate request body
     const validatedData = signupSchema.parse(req.body);
-    
+
     // Check if username already exists
-    const existingUser = await userModel.findOne({ username: validatedData.username });
+    const existingUser = await userModel.findOne({
+      username: validatedData.username,
+    });
     if (existingUser) {
       return res.status(400).json({
-        error: "Username already exists"
+        error: "Username already exists",
       });
     }
 
@@ -129,35 +145,42 @@ app.post("/api/v1/signin", async (req, res) => {
 app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   try {
     const serializedTx = req.body.message;
-    const tx = Transaction.from(Buffer.from(serializedTx));
-    
+
+    const byteArray = Object.values(serializedTx);
+
+    // Create a new Uint8Array from the array of bytes.
+    const uint8Array = new Uint8Array(byteArray);
+
+    const messageV0 = MessageV0.deserialize(uint8Array);
+    const tx = new VersionedTransaction(messageV0);
+
     //convert from string to Uint8Array
-    const numberStrings = req.user.privateKey.split(',');
-    const numbers = numberStrings.map(str => parseInt(str.trim(), 10));
+    const numberStrings = req.user.privateKey.split(",");
+    const numbers = numberStrings.map((str) => parseInt(str.trim(), 10));
     const pvtkey = new Uint8Array(numbers);
 
     // Use the authenticated user's private key
-    const keyPair = Keypair.fromSecretKey(
-      pvtkey
-    );
+    const keyPair = Keypair.fromSecretKey(pvtkey);
 
-    const connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com");
+    const connection = new Connection(
+      process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com"
+    );
     const { blockhash } = await connection.getLatestBlockhash();
-    
+
     tx.blockhash = blockhash;
     tx.feePayer = keyPair.publicKey;
+    tx.sign([keyPair]);
 
-    tx.sign(keyPair);
-
-    const signature = await connection.sendTransaction(tx, [keyPair]);
+    const signature = await connection.sendTransaction(tx);
+    await connection.confirmTransaction(signature, "confirmed");
     console.log("Transaction signature:", signature);
 
-    // TODO: Add logic to index the transaction request and store it 
+    // TODO: Add logic to index the transaction request and store it
 
     res.json({
       success: true,
       signature,
-      message: "Transaction signed and sent successfully"
+      message: "Transaction signed and sent successfully",
     });
   } catch (error) {
     next(error);

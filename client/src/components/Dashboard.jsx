@@ -1,87 +1,92 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   Transaction,
   Connection,
   SystemProgram,
   PublicKey,
   LAMPORTS_PER_SOL,
+  TransactionMessage,
 } from "@solana/web3.js";
 import axios from "axios";
 
 const connection = new Connection("https://api.devnet.solana.com/");
 
 function Dashboard() {
-  const [recipientAddress, setRecipientAddress] = useState('');
-  const [amount, setAmount] = useState('');
-  const [error, setError] = useState('');
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { logout, user, token } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate('/signin');
+    navigate("/signin");
   };
 
   const sendSol = async (amount) => {
     try {
       if (!recipientAddress) {
-        throw new Error('Please enter recipient address');
+        throw new Error("Please enter recipient address");
       }
 
       const recipientPubkey = new PublicKey(recipientAddress);
       const fromPubkey = new PublicKey(user.publicKey);
 
-      const ix = SystemProgram.transfer({
+      const createAccountIx = SystemProgram.transfer({
         fromPubkey,
         toPubkey: recipientPubkey,
         lamports: LAMPORTS_PER_SOL * amount,
       });
 
-      const tx = new Transaction().add(ix);
-      const { blockhash } = await connection.getLatestBlockhash();
-      tx.recentBlockhash = blockhash;
-      tx.feePayer = fromPubkey;
+      let latestblockHash = await connection.getLatestBlockhash();
 
-      const serializedTx = tx.serialize({
+      const message = new TransactionMessage({
+        payerKey: fromPubkey, // payer's public key
+        recentBlockhash: latestblockHash.blockhash,
+        instructions: [createAccountIx], // array of instructions
+      }).compileToV0Message();
+
+      const serializedTx = message.serialize({
         requireAllSignatures: false,
         verifySignatures: false,
       });
 
-      await axios.post("http://localhost:3000/api/v1/txn/sign", 
+      await axios.post(
+        "http://localhost:3000/api/v1/txn/sign",
         { message: serializedTx },
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'X-Public-Key': user.publicKey
-          }
+            Authorization: `Bearer ${token}`,
+            "X-Public-Key": user.publicKey,
+          },
         }
       );
 
-      setRecipientAddress('');
-      setAmount('');
-      alert('Transaction sent successfully!');
+      setRecipientAddress("");
+      setAmount("");
+      alert("Transaction sent successfully!");
     } catch (err) {
-      throw new Error(err.message || 'Failed to send transaction');
+      throw new Error(err.message || "Failed to send transaction");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       const amountInSol = parseFloat(amount);
       if (isNaN(amountInSol) || amountInSol <= 0) {
-        throw new Error('Please enter a valid amount');
+        throw new Error("Please enter a valid amount");
       }
 
       await sendSol(amountInSol);
     } catch (err) {
-      setError(err.message || 'Failed to send transaction');
+      setError(err.message || "Failed to send transaction");
     } finally {
       setLoading(false);
     }
@@ -94,7 +99,9 @@ function Dashboard() {
           <div className="max-w-md mx-auto">
             <div className="divide-y divide-gray-200">
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-                <h2 className="text-2xl font-bold mb-8 text-center">Send SOL</h2>
+                <h2 className="text-2xl font-bold mb-8 text-center">
+                  Send SOL
+                </h2>
                 {error && (
                   <div className="bg-red-50 p-4 rounded-md mb-4">
                     <div className="text-sm text-red-700">{error}</div>
@@ -128,7 +135,7 @@ function Dashboard() {
                     disabled={loading}
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                   >
-                    {loading ? 'Sending...' : 'Send SOL'}
+                    {loading ? "Sending..." : "Send SOL"}
                   </button>
                   <button
                     type="button"
