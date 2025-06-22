@@ -1,4 +1,4 @@
-const { userModel } = require("./models");
+const { userModel } = require("./models/models");
 const {
   Keypair,
   Connection,
@@ -10,10 +10,14 @@ const jwt = require("jsonwebtoken");
 const bs58 = require("bs58");
 const cors = require("cors");
 const { z } = require("zod");
+const axios = require("axios");
+
+// Import middleware
+const { authenticateToken, errorHandler } = require("./middleware");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = "123456";
+const JWT_SECRET = process.env.JWT_SECRET || "123456";
 
 // Validation schemas
 const signupSchema = z.object({
@@ -39,47 +43,6 @@ const signupSchema = z.object({
 
 app.use(express.json());
 app.use(cors());
-
-// Error handling middleware
-const errorHandler = (err, req, res, next) => {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({
-      error: "Validation Error",
-      details: err.errors,
-    });
-  }
-  res.status(500).json({
-    error: "Internal Server Error",
-    message: err.message,
-  });
-};
-
-// Authentication middleware
-const authenticateToken = async (req, res, next) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
-
-    if (!token) {
-      return res.status(401).json({ error: "Authentication token required" });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await userModel.findById(decoded.id);
-
-    if (!user) {
-      return res.status(401).json({ error: "User not found" });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(401).json({ error: "Invalid token" });
-    }
-    next(error);
-  }
-};
 
 app.post("/api/v1/signup", async (req, res, next) => {
   try {
@@ -108,6 +71,21 @@ app.post("/api/v1/signup", async (req, res, next) => {
       message: "User created successfully",
       publicKey: keypair.publicKey.toString(),
     });
+
+    const data = {
+      username: validatedData.username,
+    };
+
+    axios
+      .post("https://localhost:4000/mpc1/v1/initialize", data)
+      .then((response) => {
+        console.log("Success:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+
+    // logic to send the username to the mpc server to make their respective keypair
   } catch (error) {
     next(error);
   }
@@ -134,6 +112,15 @@ app.post("/api/v1/signin", async (req, res) => {
       publicKey: user.publicKey,
       message: "signin successful",
     });
+    // get the public keys from the mpc server
+    axios
+      .get("https://localhost:4000/mpc1/v1/public-keys")
+      .then((response) => {
+        console.log("Success:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   } else {
     res.json({
       message: "user not found signup first",

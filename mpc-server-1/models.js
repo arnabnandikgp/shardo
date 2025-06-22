@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 mongoose
-  .connect("mongodb://admin:adminpassword@localhost:27017/cloudapp", {
+  .connect("mongodb://admin:adminpassword@localhost:27017/mpc1", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     authSource: "admin", 
@@ -11,7 +11,6 @@ mongoose
 
 const UserSchema = new mongoose.Schema({
   username: String,
-//   password: String,
   privateKey: String,
   publicKey: String,
 });
