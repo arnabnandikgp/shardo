@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@solana/wallet-adapter-base": "^0.9.26",
     "@solana/wallet-adapter-react": "^0.15.38",

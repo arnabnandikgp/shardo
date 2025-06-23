@@ -11,7 +11,7 @@ import {
 } from "@solana/web3.js";
 import axios from "axios";
 
-const connection = new Connection("https://api.devnet.solana.com/");
+// const connection = new Connection("https://api.devnet.solana.com/");
 
 function Dashboard() {
   const [recipientAddress, setRecipientAddress] = useState("");
@@ -28,35 +28,12 @@ function Dashboard() {
 
   const sendSol = async (amount) => {
     try {
-      if (!recipientAddress) {
-        throw new Error("Please enter recipient address");
-      }
 
-      const recipientPubkey = new PublicKey(recipientAddress);
-      const fromPubkey = new PublicKey(user.publicKey);
-
-      const createAccountIx = SystemProgram.transfer({
-        fromPubkey,
-        toPubkey: recipientPubkey,
-        lamports: LAMPORTS_PER_SOL * amount,
-      });
-
-      let latestblockHash = await connection.getLatestBlockhash();
-
-      const message = new TransactionMessage({
-        payerKey: fromPubkey, // payer's public key
-        recentBlockhash: latestblockHash.blockhash,
-        instructions: [createAccountIx], // array of instructions
-      }).compileToV0Message();
-
-      const serializedTx = message.serialize({
-        requireAllSignatures: false,
-        verifySignatures: false,
-      });
+      // const recipientPubkey = new PublicKey(recipientAddress);
 
       await axios.post(
         "http://localhost:3000/api/v1/txn/sign",
-        { message: serializedTx },
+        { recipient: recipientAddress, amount: amount },
         {
           headers: {
             Authorization: `Bearer ${token}`,

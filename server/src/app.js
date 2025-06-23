@@ -113,14 +113,20 @@ app.post("/api/v1/signin", async (req, res) => {
       message: "signin successful",
     });
     // get the public keys from the mpc server
-    axios
-      .get("https://localhost:4000/mpc1/v1/public-keys")
-      .then((response) => {
-        console.log("Success:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+    // combine them and store them in database and also display the combined public key to the user
+    const response = await axios.get(
+      "https://localhost:3000/services/v1/get-public-keys",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-Public-Key": user.publicKey,
+        },
+      }
+    );
+    if (response.status === 200) {
+      //somehow display this as the users public key
+      const publicKey = response.data.publicKey;
+    }
   } else {
     res.json({
       message: "user not found signup first",
@@ -130,36 +136,28 @@ app.post("/api/v1/signin", async (req, res) => {
 
 app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   try {
-    const serializedTx = req.body.message;
+    const recipientAddress = req.body.recipient;
+    const amount = req.body.amount;
+    // const recipientPubkey = new PublicKey(recipientAddress);
 
-    const byteArray = Object.values(serializedTx);
-
-    // Create a new Uint8Array from the array of bytes.
-    const uint8Array = new Uint8Array(byteArray);
-
-    const messageV0 = MessageV0.deserialize(uint8Array);
-    const tx = new VersionedTransaction(messageV0);
-
-    //convert from string to Uint8Array
-    const numberStrings = req.user.privateKey.split(",");
-    const numbers = numberStrings.map((str) => parseInt(str.trim(), 10));
-    const pvtkey = new Uint8Array(numbers);
-
-    // Use the authenticated user's private key
-    const keyPair = Keypair.fromSecretKey(pvtkey);
-
-    const connection = new Connection(
-      process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com"
+    const response = await axios.get(
+      "http://localhost:3000/api/v1/services/sign-txn",
+      { recipient: recipientAddress, amount: amount },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-Public-Key": user.publicKey,
+        },
+      }
     );
-    const { blockhash } = await connection.getLatestBlockhash();
 
-    tx.blockhash = blockhash;
-    tx.feePayer = keyPair.publicKey;
-    tx.sign([keyPair]);
-
-    const signature = await connection.sendTransaction(tx);
-    await connection.confirmTransaction(signature, "confirmed");
-    console.log("Transaction signature:", signature);
+    if (response.status === 200) {
+      res.json({
+        success: true,
+        signature: response.data.signature,
+        message: "Transaction signed and sent successfully",
+      });
+    }
 
     // TODO: Add logic to index the transaction request and store it
 
