@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 
-app.post("/mpc1/v1/initialize", async (req, res, next) => {
+app.post("/mpc2/v1/initialize", async (req, res, next) => {
   try {
     const username  = req.body.username;
     const keypair = await new Keypair();
@@ -36,7 +36,7 @@ app.post("/mpc1/v1/initialize", async (req, res, next) => {
   }
 });
 
-app.get("/mpc1/v1/get-keys",authenticateToken, async (req, res, next) => {
+app.get("/mpc2/v1/get-keys",authenticateToken, async (req, res, next) => {
   try {
     const username = req.user;
     const user = await userModel.findOne({ username: username });
@@ -49,7 +49,7 @@ app.get("/mpc1/v1/get-keys",authenticateToken, async (req, res, next) => {
   }
 });
 
-app.get("/mpc1/v1/sign-txn", authenticateToken, async (req, res, next) => {
+app.get("/mpc2/v1/sign-txn", authenticateToken, async (req, res, next) => {
   try {
     const username = req.user;
     const user = await userModel.findOne({ username: username });
@@ -61,10 +61,9 @@ app.get("/mpc1/v1/sign-txn", authenticateToken, async (req, res, next) => {
     const { secretShare, publicShare } = await aggSendStepOne(user.privateKey);
     // fetch secret state and the public share of the other mpc server
     // using a axios call to the other mpc server
-    const res = await axios.get("http://localhost:4000/mpc2/v1/get-keys", {
+    const res = await axios.get("http://localhost:4000/mpc1/v1/get-keys", {
       headers: {
         Authorization: `Bearer ${req.token}`,
-        "X-Public-Key": req.user.publicKey,
       },
     });
     const otherSecretShare = res.data.secretShare;
@@ -90,5 +89,3 @@ app.get("/mpc1/v1/sign-txn", authenticateToken, async (req, res, next) => {
     next(error);
   }
 });
-
-
