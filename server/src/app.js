@@ -1,19 +1,12 @@
-const { userModel } = require("./models/models");
-const {
-  Keypair,
-  Connection,
-  VersionedTransaction,
-  MessageV0,
-} = require("@solana/web3.js");
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const bs58 = require("bs58");
-const cors = require("cors");
-const { z } = require("zod");
-const axios = require("axios");
+import {userModel} from "./models/models.js";
+import express from "express";
+import jwt from "jsonwebtoken";
+import cors from "cors";
+import { z } from "zod";
+import axios from "axios";
 
 // Import middleware
-const { authenticateToken, errorHandler } = require("./middleware");
+import { authenticateToken, errorHandler } from "./middleware/index.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,22 +52,28 @@ app.post("/api/v1/signup", async (req, res, next) => {
       });
     }
 
-    const keypair = await new Keypair();
+    console.log("funnnnnnnnnnnnnnnnny")
+
+
     await userModel.create({
       username: validatedData.username,
       password: validatedData.password,
-      privateKey: keypair.secretKey.toString(),
-      publicKey: keypair.publicKey.toString(),
     });
 
     res.status(201).json({
       message: "User created successfully",
-      publicKey: keypair.publicKey.toString(),
+      // publicKey: keypair.publicKey.toString(),
     });
+
+
+    // console.log("validated data", validatedData.username)
 
     const data = {
       username: validatedData.username,
     };
+
+
+    console.log("intiailizing endpoint entry in mpc server")
 
     axios
       .post("https://localhost:4000/mpc1/v1/initialize", data)
@@ -109,7 +108,6 @@ app.post("/api/v1/signin", async (req, res) => {
     );
     res.json({
       token,
-      publicKey: user.publicKey,
       message: "signin successful",
     });
     // get the public keys from the mpc server
@@ -119,7 +117,6 @@ app.post("/api/v1/signin", async (req, res) => {
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-Public-Key": user.publicKey,
         },
       }
     );
@@ -138,7 +135,6 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   try {
     const recipientAddress = req.body.recipient;
     const amount = req.body.amount;
-    // const recipientPubkey = new PublicKey(recipientAddress);
 
     const response = await axios.get(
       "http://localhost:3000/api/v1/services/sign-txn",
@@ -146,7 +142,6 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          "X-Public-Key": user.publicKey,
         },
       }
     );
@@ -176,3 +171,4 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+export default app;

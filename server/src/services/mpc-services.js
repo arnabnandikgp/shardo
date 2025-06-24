@@ -20,27 +20,35 @@ import {
 // Import middleware
 const { authenticateToken, errorHandler } = require("./middleware");
 
-const app = express();
+// const app = express();
+import app from '/Users/arnabnandi/bonkbot_clone/server/src/app.js';
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "123456";
 
-
-app.use(express.json());
-app.use(cors());
 
 app.get("/api/v1/services/v1/get-public-keys", authenticateToken, async (req, res, next) => {
   try {
     const username = req.user;
 
-   const res1 = await  axios.get("http://localhost:3000/api/v1/mpc1/get-keys", {
+   const res1 = await  axios.get("http://localhost:4000/api/v1/mpc1/get-keys", {
       user: username,
-    })
+    },
+  {
+    headers: {
+      Authorization: `Bearer ${req.token}`,
+    },
+  })
 
-    const res2 = await  axios.get("http://localhost:3000/api/v1/mpc2/get-keys", {
+    const res2 = await  axios.get("http://localhost:4000/api/v1/mpc2/get-keys", {
       username: user,
-    })
+    },
+  {
+    headers: {
+      Authorization: `Bearer ${req.token}`,
+    },
+  })
 
-    const combinedPublicKey = await aggregateKeys(res1.data.publicKey, res2.data.publicKey);
+    const combinedPublicKey = await aggregateKeys(res1.body.publicKey, res2.body.publicKey);
 
     res.json({
       success: true,
@@ -58,7 +66,6 @@ app.get("/api/v1/services/sign-txn", authenticateToken, async (req, res, next) =
   try {
     const recipientAddress = req.body.recipient;
     const amount = req.body.amount;
-    const recipientPubkey = new PublicKey(recipientAddress);
 
     const recentBlockHash = await recentBlockHash();
 
@@ -70,7 +77,6 @@ app.get("/api/v1/services/sign-txn", authenticateToken, async (req, res, next) =
     },{
       headers: {
         Authorization: `Bearer ${req.token}`,
-        "X-Public-Key": req.user.publicKey,
       },
     })
 
@@ -81,7 +87,6 @@ app.get("/api/v1/services/sign-txn", authenticateToken, async (req, res, next) =
     },{
       headers: {
         Authorization: `Bearer ${req.token}`,
-        "X-Public-Key": req.user.publicKey,
       },
     })
 

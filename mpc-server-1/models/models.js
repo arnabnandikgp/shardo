@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 mongoose
   .connect("mongodb://admin:adminpassword@localhost:27017/mpc1", {
@@ -15,8 +15,5 @@ const UserSchema = new mongoose.Schema({
   publicKey: String,
 });
 
-const userModel = mongoose.model("users", UserSchema);
+export const userModel = mongoose.model("users", UserSchema);
 
-module.exports = {
-  userModel,
-};
