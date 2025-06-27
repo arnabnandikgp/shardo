@@ -1,9 +1,9 @@
-import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-1/models/models.js";
+import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-3/models/models.js";
 import {
   Keypair,
 } from "@solana/web3.js";
 import express from "express";
-import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/mpc-server-1/middleware/index.js";
+import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/mpc-server-3/middleware/index.js";
 import {
   aggSendStepOne,
   aggSendStepTwo,
@@ -11,16 +11,15 @@ import {
 import cors from "cors";
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 6000;
 const JWT_SECRET = "123456";
 
 app.use(express.json());
 app.use(cors());
 
 
-app.post("/mpc1/v1/initialize", async (req, res, next) => {
+app.post("/mpc3/v1/initialize", async (req, res, next) => {
   try {
-    console.log(req.body.username);
     const username  = req.body.username;
     const keypair = await new Keypair();
     await userModel.create({
@@ -36,11 +35,12 @@ app.post("/mpc1/v1/initialize", async (req, res, next) => {
   }
 });
 
-app.get("/mpc1/v1/get-keys",authenticateToken, async (req, res, next) => {
+app.get("/mpc3/v1/get-keys",authenticateToken, async (req, res, next) => {
   try {
     const username = req.user;
-    // console.log(req.)
+    console.log("username for mpc server 3", username)
     const user = await userModel.findOne({ username: username });
+    console.log("user", user.publicKey);
     res.status(200).json({
       message: "User found successfully",
       publicKey: user.publicKey,
@@ -50,35 +50,19 @@ app.get("/mpc1/v1/get-keys",authenticateToken, async (req, res, next) => {
   }
 });
 
-// app.get("/mpc1/v1/interComm", authenticateToken, async (req, res, next) => {
-//   try{
-//     const username = req.user.username;
-//     const { _, publicShare } = await aggSendStepOne(user.privateKey);
-//     user.publicshare = publicShare;
-//     await user.save();
-
-//   } catch (error)
-//   {
-//     next(error);
-//   }
-// });
-
-app.get("/mpc1/v1/sign-txn", authenticateToken, async (req, res, next) => {
+app.get("/mpc3/v1/sign-txn", authenticateToken, async (req, res, next) => {
   try {
-
-    const recipientAddress = req.query.recipientAddress;
-    const amount = req.query.amount;
-    const blockhash = req.query.recentBlockHash;
-
-    const username = req.user.username;
+    const username = req.user;
     const user = await userModel.findOne({ username: username });
+    const blockhash = req.body.recentBlockHash;
+    const amount = req.body.amount;
+    const recipientAddress = req.body.recipientAddress;
     const ownPublicKey = user.publicKey;
 
-    // the step below do not requires to be executed now and can be called earlier and cached
     const { secretShare, publicShare } = await aggSendStepOne(user.privateKey);
-
-    // need to get the publicshare and the publickey of the other mpc server
-    const res = await axios.get("http://localhost:6000/mpc3/v1/endpoint", {
+    // fetch secret state and the public share of the other mpc server
+    // using a axios call to the other mpc server
+    const res = await axios.get("http://localhost:4000/mpc1/v1/get-keys", {
       headers: {
         Authorization: `Bearer ${req.token}`,
       },

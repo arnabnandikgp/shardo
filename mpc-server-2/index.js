@@ -1,9 +1,9 @@
-import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-1/models/models.js";
+import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-2/models/models.js";
 import {
   Keypair,
 } from "@solana/web3.js";
 import express from "express";
-import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/mpc-server-1/middleware/index.js";
+import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/mpc-server-2/middleware/index.js";
 import {
   aggSendStepOne,
   aggSendStepTwo,
@@ -11,7 +11,7 @@ import {
 import cors from "cors";
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 const JWT_SECRET = "123456";
 
 app.use(express.json());
@@ -29,7 +29,6 @@ app.post("/mpc2/v1/initialize", async (req, res, next) => {
     });
     res.status(201).json({
       message: "User created successfully",
-      // publicKey: keypair.publicKey.toString(),
     });
   } catch (error) {
     next(error);
@@ -89,3 +88,9 @@ app.get("/mpc2/v1/sign-txn", authenticateToken, async (req, res, next) => {
     next(error);
   }
 });
+
+app.use(errorHandler);
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
+});
+

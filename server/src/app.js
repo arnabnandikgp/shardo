@@ -130,8 +130,11 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
 
     const response = await axios.get(
       "http://localhost:9000/services/v1/sign-txn",
-      { recipient: recipientAddress, amount: amount },
-      {
+      { 
+        params: {
+          recipient: recipientAddress, 
+          amount: amount 
+        },
         headers: {
           Authorization: `Bearer ${token}`,
         },

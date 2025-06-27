@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-2/models/models.js";
+import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-3/models/models.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "123456";
 
@@ -23,9 +23,6 @@ const authenticateToken = async (req, res, next) => {
 
     req.user = user.username;
     req.token = token;
-
-    console.log("req.user", req.user);
-    console.log("req.token", req.token);
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {

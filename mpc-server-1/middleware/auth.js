@@ -23,9 +23,6 @@ const authenticateToken = async (req, res, next) => {
 
     req.user = user.username;
     req.token = token;
-
-    console.log("req.user", req.user);
-    console.log("req.token", req.token);
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {

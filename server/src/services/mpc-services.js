@@ -59,27 +59,30 @@ appservice.get("/services/v1/get-public-keys", authenticateToken, async (req, re
 appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next) => {
   try {
     console.log("meow meow")
-    const recipientAddress = req.body.recipient;
-    const amount = req.body.amount;
+    const recipientAddress = req.query.recipient;
+    const amount = req.query.amount;
 
     const recentBlockHash = await recentBlockHash();
 
-
-   const sigmpc1 = await  axios.get("http://localhost:4000/api/v1/mpc1/sign-txn", {
-      recipient: recipientAddress,
-      amount: amount,
-      recentBlockHash: recentBlockHash,
-    },{
+   const sigmpc1 = await  axios.get("http://localhost:4000/mpc1/v1/sign-txn",
+    {
+      params: {
+        recipient: recipientAddress,
+        amount: amount,
+        recentBlockHash: recentBlockHash,
+      },
       headers: {
         Authorization: `Bearer ${req.token}`,
       },
     })
 
-    const sigmpc2 = await  axios.get("http://localhost:5000/api/v1/mpc2/sign-txn", {
-      recipient: recipientAddress,
-      amount: amount,
-      recentBlockHash: recentBlockHash,
-    },{
+    const sigmpc2 = await  axios.get("http://localhost:6000/mpc3/v1/sign-txn", 
+      {
+      params: {      
+        recipient: recipientAddress,
+        amount: amount,
+        recentBlockHash: recentBlockHash,
+      },
       headers: {
         Authorization: `Bearer ${req.token}`,
       },
