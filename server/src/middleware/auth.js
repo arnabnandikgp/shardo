@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "123456";
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    console.log(authHeader)
+    // console.log(authHeader)
     const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
     if (!token) {
@@ -32,6 +32,4 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-export {
-  authenticateToken,
-};
+export { authenticateToken };

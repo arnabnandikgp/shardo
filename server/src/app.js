@@ -1,4 +1,4 @@
-import {userModel} from "./models/models.js";
+import { userModel } from "./models/models.js";
 import express from "express";
 import jwt from "jsonwebtoken";
 import cors from "cors";
@@ -6,11 +6,13 @@ import { z } from "zod";
 import axios from "axios";
 
 // Import middleware
-import { authenticateToken, errorHandler } from "./middleware/index.js";
+import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "123456";
+
+// import services from "./services/mpc-services.js";
 
 // Validation schemas
 const signupSchema = z.object({
@@ -51,39 +53,25 @@ app.post("/api/v1/signup", async (req, res, next) => {
         error: "Username already exists",
       });
     }
-
-    console.log("funnnnnnnnnnnnnnnnny")
-
-
+     
     await userModel.create({
       username: validatedData.username,
       password: validatedData.password,
     });
-
-    res.status(201).json({
-      message: "User created successfully",
-      // publicKey: keypair.publicKey.toString(),
-    });
-
-
-    // console.log("validated data", validatedData.username)
 
     const data = {
       username: validatedData.username,
     };
 
 
-    console.log("intiailizing endpoint entry in mpc server")
+    const response1 = await axios.post("http://localhost:4000/mpc1/v1/initialize", data);
+    const response2 = await axios.post("http://localhost:6000/mpc3/v1/initialize", data);
 
-    axios
-      .post("https://localhost:4000/mpc1/v1/initialize", data)
-      .then((response) => {
-        console.log("Success:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
+    if (response1.status === 201 && response2.status === 201) {
+      res.status(201).json({
+      message: "User created successfully on both the mpc servers",
       });
-
+    }
     // logic to send the username to the mpc server to make their respective keypair
   } catch (error) {
     next(error);
@@ -106,23 +94,27 @@ app.post("/api/v1/signin", async (req, res) => {
       },
       JWT_SECRET
     );
-    res.json({
-      token,
-      message: "signin successful",
-    });
+
+    console.log("token", token);
+
     // get the public keys from the mpc server
     // combine them and store them in database and also display the combined public key to the user
     const response = await axios.get(
-      "https://localhost:3000/services/v1/get-public-keys",
+      "http://localhost:9000/services/v1/get-public-keys",
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+           authorization: `Bearer ${token}`,
         },
       }
     );
     if (response.status === 200) {
       //somehow display this as the users public key
       const publicKey = response.data.publicKey;
+      res.json({
+        token,
+        message: "signin successful",
+        publicKey,
+      });
     }
   } else {
     res.json({
@@ -137,7 +129,7 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
     const amount = req.body.amount;
 
     const response = await axios.get(
-      "http://localhost:3000/api/v1/services/sign-txn",
+      "http://localhost:9000/services/v1/sign-txn",
       { recipient: recipientAddress, amount: amount },
       {
         headers: {
@@ -166,9 +158,11 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   }
 });
 
+// app.use(services);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 export default app;

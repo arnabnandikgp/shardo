@@ -1,69 +1,64 @@
-const { userModel } = require("./models/models");
-const {
-  Keypair,
-  Connection,
-  VersionedTransaction,
-  MessageV0,
-} = require("@solana/web3.js");
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const bs58 = require("bs58");
-const cors = require("cors");
-const { z } = require("zod");
-const axios = require("axios");
+// const { userModel } = require("/Users/arnabnandi/bonkbot_clone/server/src/models/models.js");
+import express from "express";
+import axios from "axios";
 import {
   aggregateKeys,
   aggregateSignaturesAndBroadcast,
-  recentBlockHash,
 } from '/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js'; // Adjust the import path as needed
 
+const router = express.Router();
+
+const appservice = express();
+const PORT = process.env.PORT || 9000;
 // Import middleware
-const { authenticateToken, errorHandler } = require("./middleware");
+import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
 
-// const app = express();
-import app from '/Users/arnabnandi/bonkbot_clone/server/src/app.js';
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "123456";
-
-
-app.get("/api/v1/services/v1/get-public-keys", authenticateToken, async (req, res, next) => {
+appservice.get("/services/v1/get-public-keys", authenticateToken, async (req, res, next) => {
   try {
-    const username = req.user;
 
-   const res1 = await  axios.get("http://localhost:4000/api/v1/mpc1/get-keys", {
-      user: username,
-    },
-  {
-    headers: {
-      Authorization: `Bearer ${req.token}`,
-    },
-  })
+    const username = req.user.username;
 
-    const res2 = await  axios.get("http://localhost:4000/api/v1/mpc2/get-keys", {
-      username: user,
-    },
-  {
-    headers: {
-      Authorization: `Bearer ${req.token}`,
-    },
-  })
+    console.log("token is   ",req.token )
+    console.log("username", username)
 
-    const combinedPublicKey = await aggregateKeys(res1.body.publicKey, res2.body.publicKey);
+    const res1 = await axios.get(
+      "http://localhost:4000/mpc1/v1/get-keys",
+      {
+        params: { username }, // query params
+        headers: { Authorization: `Bearer ${req.token}` }
+      }
+    );
+    console.log("somethign aftert the frst req", res1.data)
+    console.log("res1.body.publicKey",res1.data.publicKey)
+
+    const res2 = await axios.get(
+      "http://localhost:6000/mpc3/v1/get-keys",
+      {
+        params: { username }, // query params
+        headers: { Authorization: `Bearer ${req.token}` }
+      }
+    );
+
+    console.log("res2 happend")
+
+    const combinedPublicKey = await aggregateKeys(res1.data.publicKey, res2.data.publicKey);
 
     res.json({
       success: true,
-      publicKey:combinedPublicKey,
+      publicKey: combinedPublicKey,
       message: "This is the combined public key",
     });
   }
   catch (error) {
-    console.error(error);
+    console.log("something went wrong")
+    // console.error(error);
     next(error);
   }
   });
 
-app.get("/api/v1/services/sign-txn", authenticateToken, async (req, res, next) => {
+appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next) => {
   try {
+    console.log("meow meow")
     const recipientAddress = req.body.recipient;
     const amount = req.body.amount;
 
@@ -80,7 +75,7 @@ app.get("/api/v1/services/sign-txn", authenticateToken, async (req, res, next) =
       },
     })
 
-    const sigmpc2 = await  axios.get("http://localhost:4000/api/v1/mpc2/sign-txn", {
+    const sigmpc2 = await  axios.get("http://localhost:5000/api/v1/mpc2/sign-txn", {
       recipient: recipientAddress,
       amount: amount,
       recentBlockHash: recentBlockHash,
@@ -111,9 +106,11 @@ app.get("/api/v1/services/sign-txn", authenticateToken, async (req, res, next) =
     console.error(error);
     next(error);
   }
-  });
-app.use(errorHandler);
+});
 
-app.listen(PORT, () => {
+
+appservice.use(errorHandler);
+
+appservice.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
