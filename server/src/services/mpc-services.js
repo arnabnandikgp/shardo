@@ -1,4 +1,3 @@
-// const { userModel } = require("/Users/arnabnandi/bonkbot_clone/server/src/models/models.js");
 import express from "express";
 import axios from "axios";
 import {
@@ -6,13 +5,10 @@ import {
   aggregateSignaturesAndBroadcast,
   recentBlockHash,
 } from '/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js'; // Adjust the import path as needed
-
-const router = express.Router();
+import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
 
 const appservice = express();
 const PORT = process.env.PORT || 9000;
-// Import middleware
-import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
 
 appservice.get("/services/v1/get-public-keys", authenticateToken, async (req, res, next) => {
   try {

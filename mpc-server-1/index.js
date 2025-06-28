@@ -5,13 +5,11 @@ import {
   aggSendStepOne,
   aggSendStepTwo,
   generateShares,
-  recentBlockHash
 } from "/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js";
 import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const JWT_SECRET = "123456";
 
 app.use(express.json());
 app.use(cors());

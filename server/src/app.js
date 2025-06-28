@@ -4,15 +4,12 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import { z } from "zod";
 import axios from "axios";
-
-// Import middleware
 import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "123456";
 
-// import services from "./services/mpc-services.js";
 
 // Validation schemas
 const signupSchema = z.object({
