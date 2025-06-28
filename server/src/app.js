@@ -63,11 +63,8 @@ app.post("/api/v1/signup", async (req, res, next) => {
       username: validatedData.username,
     };
 
-
     const response1 = await axios.post("http://localhost:4000/mpc1/v1/initialize", data);
-    console.log("resopnse1", response1);
     const response2 = await axios.post("http://localhost:6000/mpc3/v1/initialize", data);
-    console.log("respionse2", response2);
 
     if (response1.status === 201 && response2.status === 201) {
       res.status(201).json({
@@ -97,10 +94,6 @@ app.post("/api/v1/signin", async (req, res) => {
       JWT_SECRET
     );
 
-    console.log("token", token);
-
-    // get the public keys from the mpc server
-    // combine them and store them in database and also display the combined public key to the user
     const response = await axios.get(
       "http://localhost:9000/services/v1/get-public-keys",
       {

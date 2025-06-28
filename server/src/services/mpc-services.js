@@ -44,8 +44,6 @@ appservice.get("/services/v1/get-public-keys", authenticateToken, async (req, re
     });
   }
   catch (error) {
-    console.log("something went wrong")
-    // console.error(error);
     next(error);
   }
   });
@@ -55,10 +53,6 @@ appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next
     const recipientAddress = req.query.recipient;
     const amount = req.query.amount;
     const token = req.token;
-
-    console.log("recipient", recipientAddress);
-    console.log("amount", amount);
-    console.log("token from mpc services", token)
 
     const publicResp1 = await axios.get("http://localhost:4000/mpc1/v1/send-public-info",
       {
@@ -71,8 +65,6 @@ appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next
     const publicShare1 = publicResp1.data.publicShare;
     const publicKey1 = publicResp1.data.publicKey;
 
-    console.log("response 1 is coming?",publicShare1 )
-
     const publicResp2 = await axios.get("http://localhost:6000/mpc3/v1/send-public-info",
       {
         headers: {
@@ -84,11 +76,7 @@ appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next
     const publicShare2 = publicResp2.data.publicShare;
     const publicKey2 = publicResp2.data.publicKey;
 
-    console.log("response 2 is coming?",publicShare2 )
-
     const blockhash = await recentBlockHash("devnet");
-    // console.log("the block hash is", blockhash.blockHash);  
-    // console.log("the recipient address is", recipientAddress);
 
     
 
@@ -119,17 +107,6 @@ appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next
         Authorization: `Bearer ${req.token}`,
       },
     })
-    // console.log("yo", sigmpc1)
-
-    console.log("sigmpc1", sigmpc1.data.sig);
-    console.log("sigmpc2", sigmpc2.data.sig);
-
-    console.log("all the inputs--------------------------")
-    console.log("recipientAddress", recipientAddress);
-    console.log("amount", amount);
-    console.log("publicKey1 and PublicKey2", publicKey1,publicKey2);
-    console.log("blockhash", blockhash.blockHash);
-    console.log("signatures", sigmpc1.data.sig, sigmpc2.data.sig);
 
     const {output} = await aggregateSignaturesAndBroadcast({
       to : recipientAddress,
@@ -138,7 +115,6 @@ appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next
       recentBlockHash: blockhash.blockHash,
       signatures: [sigmpc1.data.sig, sigmpc2.data.sig],
     });
-    console.log("the finaaaaaaaaal sigature is", output);
 
     res.json({
       success: true,

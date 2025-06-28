@@ -54,8 +54,6 @@ app.get("/mpc1/v1/send-public-info", authenticateToken, async (req, res, next) =
     const username = req.user;
     const user = await userModel.findOne({ username: username });
     const pk = user.publicKey;
-    // console.log("the private key ")
-    console.log("user",user)
     const { message_1, secret_state } = await aggSendStepOne(user.privateKey);
 
     user.secret_state = secret_state;
@@ -83,27 +81,7 @@ app.get("/mpc1/v1/sign-txn", authenticateToken, async (req, res, next) => {
     const username = req.user;
     const user = await userModel.findOne({ username: username });
     const ownPublicKey = user.publicKey;
-
-    // logging all variables
-    console.log("recipientAddress", recipientAddress);
-    console.log("amount", amount);
-    console.log("blockhash", blockhash);
-    console.log("PublicKey2", PublicKey2);
-    console.log("PublicShare2", PublicShare2);
-    console.log("ownPublicKey", ownPublicKey);
-
-    // the step below do not requires to be executed now and can be called earlier and cached
-    // const { _, secret_state } = await aggSendStepOne(user.privateKey);
     const secret_state = user.secret_state;
-    console.log("secret_state 11", secret_state);
-    console.log("the input parameters");
-    console.log("user.privateKey", user.privateKey);
-    console.log("recipientAddress", recipientAddress);
-    console.log("amount", amount);
-    console.log("ownPublicKey and PublicKey2", ownPublicKey, PublicKey2);
-    console.log("blockhash", blockhash);
-    console.log("PublicShare2", PublicShare2);
-    console.log("secret_state 12", secret_state);
 
     const partialSignature = await aggSendStepTwo({
       keypair: user.privateKey,
@@ -114,8 +92,6 @@ app.get("/mpc1/v1/sign-txn", authenticateToken, async (req, res, next) => {
       firstMessages: PublicShare2,
       secretState: secret_state,
     });
-    //send this partial signature to the services
-    console.log("the signature function is not working aint it?", partialSignature.partialSignature);
 
     res.status(200).json({
       sig: partialSignature.partialSignature,

@@ -6,7 +6,7 @@ mongoose
     useUnifiedTopology: true,
     authSource: "admin", 
   })
-  .then(() => console.log("Connected to MongoDBypyp"))
+  .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const UserSchema = new mongoose.Schema({

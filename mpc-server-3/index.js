@@ -79,21 +79,7 @@ app.get("/mpc3/v1/sign-txn", authenticateToken, async (req, res, next) => {
     const username = req.user;
     const user = await userModel.findOne({ username: username });
     const ownPublicKey = user.publicKey;
-
-    // const { _, secret_state } = await aggSendStepOne(user.privateKey); // this is generated later and thus do not matches with the publicshare that was sent to the other server
     const secret_state = user.secret_state;
-    console.log("the user", user)
-
-    console.log("secret_state 22", secret_state);
-    console.log("the input parameters");
-    console.log("user.privateKey", user.privateKey);
-    console.log("recipientAddress", recipientAddress);
-    console.log("amount", amount);
-    console.log("ownPublicKey and PublicKey2", ownPublicKey, PublicKey1);
-    console.log("blockhash", blockhash);
-    console.log("PublicShare2", PublicShare1);
-    console.log("secret_state 23", secret_state);
-
 
     const partialSignature = await aggSendStepTwo({
       keypair: user.privateKey,
@@ -104,10 +90,6 @@ app.get("/mpc3/v1/sign-txn", authenticateToken, async (req, res, next) => {
       firstMessages: PublicShare1,
       secretState: secret_state,
     });
-
-    console.log("mpc server 2 signature?", partialSignature.partialSignature);
-
-    //send this partial signature to the services
 
     res.status(200).json({
       sig: partialSignature.partialSignature,
