@@ -13,6 +13,10 @@ const UserSchema = new mongoose.Schema({
   username: String,
   privateKey: String,
   publicKey: String,
+  secret_state:{
+    type: String,
+    default: null,
+  },
 });
 
 export const userModel = mongoose.model("users", UserSchema);

@@ -1,12 +1,11 @@
 import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-1/models/models.js";
-import {
-  Keypair,
-} from "@solana/web3.js";
 import express from "express";
 import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/mpc-server-1/middleware/index.js";
 import {
   aggSendStepOne,
   aggSendStepTwo,
+  generateShares,
+  recentBlockHash
 } from "/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js";
 import cors from "cors";
 
@@ -20,13 +19,12 @@ app.use(cors());
 
 app.post("/mpc1/v1/initialize", async (req, res, next) => {
   try {
-    console.log(req.body.username);
     const username  = req.body.username;
-    const keypair = await new Keypair();
+    const { secretShare, publicShare } = await generateShares();
     await userModel.create({
       username: username,
-      privateKey: keypair.secretKey.toString(),
-      publicKey: keypair.publicKey.toString(),
+      privateKey: secretShare,
+      publicKey: publicShare,
     });
     res.status(201).json({
       message: "User created successfully",
@@ -39,7 +37,6 @@ app.post("/mpc1/v1/initialize", async (req, res, next) => {
 app.get("/mpc1/v1/get-keys",authenticateToken, async (req, res, next) => {
   try {
     const username = req.user;
-    // console.log(req.)
     const user = await userModel.findOne({ username: username });
     res.status(200).json({
       message: "User found successfully",
@@ -50,57 +47,78 @@ app.get("/mpc1/v1/get-keys",authenticateToken, async (req, res, next) => {
   }
 });
 
-// app.get("/mpc1/v1/interComm", authenticateToken, async (req, res, next) => {
-//   try{
-//     const username = req.user.username;
-//     const { _, publicShare } = await aggSendStepOne(user.privateKey);
-//     user.publicshare = publicShare;
-//     await user.save();
 
-//   } catch (error)
-//   {
-//     next(error);
-//   }
-// });
+// send the public key and the public share
+app.get("/mpc1/v1/send-public-info", authenticateToken, async (req, res, next) => { 
+  try{
+    const username = req.user;
+    const user = await userModel.findOne({ username: username });
+    const pk = user.publicKey;
+    // console.log("the private key ")
+    console.log("user",user)
+    const { message_1, secret_state } = await aggSendStepOne(user.privateKey);
+
+    user.secret_state = secret_state;
+    await user.save();
+
+    res.status(200).json({
+      message: "User found successfully, transmitting the public information",
+      publicKey: pk,
+      publicShare: message_1,
+    });
+  } catch (error)
+  {
+    next(error);
+  }
+});
 
 app.get("/mpc1/v1/sign-txn", authenticateToken, async (req, res, next) => {
   try {
-
-    const recipientAddress = req.query.recipientAddress;
+    const recipientAddress = req.query.recipient;
     const amount = req.query.amount;
     const blockhash = req.query.recentBlockHash;
+    const PublicKey2 = req.query.otherPublicKey;
+    const PublicShare2 = req.query.otherPublicShare;
 
-    const username = req.user.username;
+    const username = req.user;
     const user = await userModel.findOne({ username: username });
     const ownPublicKey = user.publicKey;
 
+    // logging all variables
+    console.log("recipientAddress", recipientAddress);
+    console.log("amount", amount);
+    console.log("blockhash", blockhash);
+    console.log("PublicKey2", PublicKey2);
+    console.log("PublicShare2", PublicShare2);
+    console.log("ownPublicKey", ownPublicKey);
+
     // the step below do not requires to be executed now and can be called earlier and cached
-    const { secretShare, publicShare } = await aggSendStepOne(user.privateKey);
+    // const { _, secret_state } = await aggSendStepOne(user.privateKey);
+    const secret_state = user.secret_state;
+    console.log("secret_state 11", secret_state);
+    console.log("the input parameters");
+    console.log("user.privateKey", user.privateKey);
+    console.log("recipientAddress", recipientAddress);
+    console.log("amount", amount);
+    console.log("ownPublicKey and PublicKey2", ownPublicKey, PublicKey2);
+    console.log("blockhash", blockhash);
+    console.log("PublicShare2", PublicShare2);
+    console.log("secret_state 12", secret_state);
 
-    // need to get the publicshare and the publickey of the other mpc server
-    const res = await axios.get("http://localhost:6000/mpc3/v1/endpoint", {
-      headers: {
-        Authorization: `Bearer ${req.token}`,
-      },
+    const partialSignature = await aggSendStepTwo({
+      keypair: user.privateKey,
+      to: recipientAddress,
+      amount: amount,
+      keys: [ownPublicKey, PublicKey2],
+      recentBlockHash: blockhash,
+      firstMessages: PublicShare2,
+      secretState: secret_state,
     });
-    const otherSecretShare = res.data.secretShare;
-    const otherPublicKey = res.data.publicKey;
-
-    const partialSignature = await aggSendStepTwo(
-      user.privateKey,
-      recipientAddress,
-      amount,
-      ownPublicKey,
-      otherPublicKey,
-      blockhash,
-      secretShare,
-      otherSecretShare
-    );
-
     //send this partial signature to the services
+    console.log("the signature function is not working aint it?", partialSignature.partialSignature);
 
     res.status(200).json({
-      partialSignature: partialSignature,
+      sig: partialSignature.partialSignature,
     });
   } catch (error) {
     next(error);

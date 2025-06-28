@@ -22,9 +22,11 @@ import {
   
     // 3. Airdrop
     const airdropResult = await airdrop(aggregatedPublicKey, 0.2);
-    console.log('Airdrop:', airdropResult);
+    console.log('Airdrop:', airdropResult)
   
     // ...and so on for the other functions
+
+
   }
   
   demo().catch(console.error);

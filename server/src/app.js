@@ -65,7 +65,9 @@ app.post("/api/v1/signup", async (req, res, next) => {
 
 
     const response1 = await axios.post("http://localhost:4000/mpc1/v1/initialize", data);
+    console.log("resopnse1", response1);
     const response2 = await axios.post("http://localhost:6000/mpc3/v1/initialize", data);
+    console.log("respionse2", response2);
 
     if (response1.status === 201 && response2.status === 201) {
       res.status(201).json({
@@ -127,6 +129,7 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   try {
     const recipientAddress = req.body.recipient;
     const amount = req.body.amount;
+    const token = req.token;
 
     const response = await axios.get(
       "http://localhost:9000/services/v1/sign-txn",
@@ -161,7 +164,6 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   }
 });
 
-// app.use(services);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
