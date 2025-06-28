@@ -131,7 +131,7 @@ appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next
     console.log("blockhash", blockhash.blockHash);
     console.log("signatures", sigmpc1.data.sig, sigmpc2.data.sig);
 
-    const output = await aggregateSignaturesAndBroadcast({
+    const {output} = await aggregateSignaturesAndBroadcast({
       to : recipientAddress,
       amount: amount,
       keys: [publicKey1, publicKey2],
@@ -142,7 +142,7 @@ appservice.get("/services/v1/sign-txn", authenticateToken, async (req, res, next
 
     res.json({
       success: true,
-      signature: output.output,
+      txn_details: output,
       message: "Transaction signed and sent successfully",
     });
 

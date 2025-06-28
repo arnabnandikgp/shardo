@@ -147,18 +147,12 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
     if (response.status === 200) {
       res.json({
         success: true,
-        signature: response.data.signature,
+        signature: response.data.txn_details,
         message: "Transaction signed and sent successfully",
       });
     }
 
     // TODO: Add logic to index the transaction request and store it
-
-    res.json({
-      success: true,
-      signature,
-      message: "Transaction signed and sent successfully",
-    });
   } catch (error) {
     next(error);
   }
