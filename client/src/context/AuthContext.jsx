@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext(null);
@@ -6,6 +6,20 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Restore authentication state from localStorage on mount
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedPublicKey = localStorage.getItem('publicKey');
+    
+    if (storedToken && storedPublicKey) {
+      setToken(storedToken);
+      setUser({ publicKey: storedPublicKey });
+    }
+    
+    setLoading(false);
+  }, []);
 
   const signup = async (username, password) => {
     try {
@@ -50,6 +64,22 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = () => {
     return !!token;
   };
+
+  // Don't render children until we've checked localStorage
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ user, token, signup, signin, logout, isAuthenticated }}>
