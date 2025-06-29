@@ -18,6 +18,7 @@ function LandingPage() {
           width: '100%',
           maxWidth: '480px',
           textAlign: 'center',
+          marginTop: '6.5rem',
         }}>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '1px', color: '#a259ff' }}>
             Welcome to Shardo!
@@ -38,6 +39,24 @@ function LandingPage() {
           </div>
         </div>
       </main>
+      {/* Learn How It Works Section */}
+      <section style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '2rem', marginBottom: '3rem' }}>
+        <h2 style={{ color: '#a259ff', fontSize: '2rem', fontWeight: 700, marginBottom: '1.5rem', letterSpacing: '1px' }}>Learn How It Works</h2>
+        <div style={{
+          background: 'rgba(24, 24, 27, 0.97)',
+          boxShadow: '0 0 60px 10px #a259ff44',
+          borderRadius: '2rem',
+          padding: '2.5rem 2.5rem',
+          width: '100%',
+          maxWidth: '900px',
+          minHeight: '160px',
+          color: '#eee',
+          fontSize: '1.15rem',
+          textAlign: 'left',
+        }}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam massa nisl quis neque. (Replace this text with your own explanation!)
+        </div>
+      </section>
     </div>
   );
 }
