@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   Transaction,
@@ -28,6 +28,7 @@ function Dashboard() {
   const { logout, user, token } = useAuth();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -96,6 +97,61 @@ function Dashboard() {
           <button onClick={handleCopy} style={{ background: 'none', border: 'none', color: '#a259ff', cursor: 'pointer', fontSize: '1.2rem', padding: 0, marginLeft: '0.2rem' }} title="Copy">
             {copied ? '✓' : <svg style={{ verticalAlign: 'middle' }} width="20" height="20" fill="none" stroke="#a259ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v6"/></svg>}
           </button>
+          {/* Info bubble */}
+          <div
+            style={{ position: 'relative', display: 'inline-block', marginLeft: '0.5rem' }}
+            onMouseEnter={() => setShowInfo(true)}
+            onMouseLeave={() => setShowInfo(false)}
+          >
+            <button
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#a259ff',
+                color: '#fff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px #a259ff33',
+                padding: 0,
+              }}
+              tabIndex={0}
+              aria-label="Info"
+            >
+              i
+            </button>
+            {showInfo && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '120%',
+                  right: 0,
+                  background: '#fff',
+                  color: '#222',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 2px 16px #0002',
+                  padding: '0.7em 1em',
+                  fontSize: '0.95rem',
+                  minWidth: 240,
+                  zIndex: 100,
+                  whiteSpace: 'normal',
+                  textAlign: 'left',
+                  pointerEvents: 'auto',
+                }}
+              >
+                This key is aggregated from the 2 different public key components, click{' '}
+                <Link to="/?section=learn-how-it-works" style={{ color: '#a259ff', textDecoration: 'underline', fontWeight: 600 }}>
+                  here
+                </Link>{' '}
+                to learn more.
+              </div>
+            )}
+          </div>
         </div>
       )}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100%' }}>

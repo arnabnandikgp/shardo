@@ -55,9 +55,28 @@ function LandingPage() {
           fontSize: '1.15rem',
           textAlign: 'left',
         }}>
-          {learnHowItWorksContent.split(/\n+/).map((para, idx) => para.trim() && (
-            <p key={idx} style={{ marginBottom: '1.2em', lineHeight: 1.7 }}>{para}</p>
-          ))}
+          {learnHowItWorksContent.map((block, idx) => {
+            if (block.type === 'paragraph') {
+              return (
+                <p key={idx} style={{ marginBottom: '1.2em', lineHeight: 1.7 }}>{block.text}</p>
+              );
+            }
+            if (block.type === 'image') {
+              return (
+                <div key={idx} style={{ margin: '2em 0', textAlign: 'center' }}>
+                  <img
+                    src={block.src}
+                    alt={block.alt}
+                    style={{ maxWidth: '100%', maxHeight: 240, borderRadius: '1rem', boxShadow: '0 2px 16px #a259ff33' }}
+                  />
+                  <div style={{ color: '#a259ff', fontSize: '1rem', marginTop: '0.5em' }}>
+                    {block.description}
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })}
         </div>
       </section>
     </div>

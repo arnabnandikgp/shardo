@@ -1,4 +1,4 @@
-# Cloud App - Solana Transaction Manager
+# Shardo - Solana Transaction Manager
 
 A full-stack web application for managing Solana transactions with secure authentication and advanced private key management using Threshold Signature Scheme (TSS).
 
