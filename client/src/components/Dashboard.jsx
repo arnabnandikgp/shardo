@@ -10,6 +10,7 @@ import {
   TransactionMessage,
 } from "@solana/web3.js";
 import axios from "axios";
+import Header from "./Header";
 
 // const connection = new Connection("https://api.devnet.solana.com/");
 
@@ -70,9 +71,10 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
-      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+    <div style={{ minHeight: '100vh', minWidth: '100vw', width: '100%', height: '100%', background: 'radial-gradient(circle at 60% 40%, #2d0036 0%, #18181b 100%)', color: '#fff', display: 'flex', flexDirection: 'column' }}>
+      <Header />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100%' }}>
+        <div className="relative px-4 py-10" style={{ background: 'rgba(24,24,27,0.95)', boxShadow: '0 0 40px #a259ff55', borderRadius: '2rem', width: '100%', maxWidth: '480px', textAlign: 'center' }}>
           <div className="max-w-md mx-auto">
             <div className="divide-y divide-gray-200">
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
