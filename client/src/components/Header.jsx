@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import shardoLogo from '../assets/shardo_og_gemini_svg.svg';
 
 function Header() {
   const { isAuthenticated, logout } = useAuth();
@@ -18,6 +19,9 @@ function Header() {
       style={{
         width: '100%',
         padding: '1.5rem 0',
+        paddingLeft: '2.5rem',
+        paddingRight: '2.5rem',
+        boxSizing: 'border-box',
         background: 'linear-gradient(90deg, #1a1a2e 0%, #6a0572 50%, #1f4068 100%)',
         boxShadow: '0 2px 16px #6a057288',
         display: 'flex',
@@ -27,8 +31,9 @@ function Header() {
         zIndex: 10,
       }}
     >
-      <Link to="/" style={{ textDecoration: 'none' }}>
-        <div style={{ fontWeight: 700, fontSize: '1.5rem', color: '#fff', marginLeft: '2rem', letterSpacing: '2px', cursor: 'pointer' }}>
+      <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+        <img src={shardoLogo} alt="Shardo Logo" style={{ width: 36, height: 36, marginRight: 12, verticalAlign: 'middle', borderRadius: '0.5rem', background: 'transparent' }} />
+        <div style={{ fontWeight: 700, fontSize: '1.5rem', color: '#fff', letterSpacing: '2px', display: 'inline' }}>
           Shardo
         </div>
       </Link>

@@ -1,6 +1,7 @@
 import Header from './Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import learnHowItWorksContent from '../content/learnHowItWorks';
 
 function LandingPage() {
   const { isAuthenticated } = useAuth();
@@ -54,7 +55,9 @@ function LandingPage() {
           fontSize: '1.15rem',
           textAlign: 'left',
         }}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque euismod, urna eu tincidunt consectetur, nisi nisl aliquam nunc, eget aliquam massa nisl quis neque. (Replace this text with your own explanation!)
+          {learnHowItWorksContent.split(/\n+/).map((para, idx) => para.trim() && (
+            <p key={idx} style={{ marginBottom: '1.2em', lineHeight: 1.7 }}>{para}</p>
+          ))}
         </div>
       </section>
     </div>
