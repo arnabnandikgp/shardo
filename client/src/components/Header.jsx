@@ -27,9 +27,11 @@ function Header() {
         zIndex: 10,
       }}
     >
-      <div style={{ fontWeight: 700, fontSize: '1.5rem', color: '#fff', marginLeft: '2rem', letterSpacing: '2px' }}>
-        BONKBOT WALLET
-      </div>
+      <Link to="/" style={{ textDecoration: 'none' }}>
+        <div style={{ fontWeight: 700, fontSize: '1.5rem', color: '#fff', marginLeft: '2rem', letterSpacing: '2px', cursor: 'pointer' }}>
+          Shardo
+        </div>
+      </Link>
       <div style={{ marginRight: '2rem', display: 'flex', gap: '1rem' }}>
         {isAuthenticated() ? (
           <button style={{ ...btnStyle, background: '#a259ff', color: '#fff' }} onClick={handleLogout}>

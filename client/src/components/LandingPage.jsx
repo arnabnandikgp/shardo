@@ -20,7 +20,7 @@ function LandingPage() {
           textAlign: 'center',
         }}>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '1px', color: '#a259ff' }}>
-            Welcome to BonkBot Wallet!
+            Welcome to Shardo!
           </h1>
           <ul style={{ textAlign: 'left', margin: '1.5rem 0', fontSize: '1.15rem', lineHeight: 1.7 }}>
             <li>🔒 Secure your private key with <b>Threshold Signature Scheme (TSS)</b></li>
