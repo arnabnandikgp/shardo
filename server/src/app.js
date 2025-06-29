@@ -99,9 +99,10 @@ app.post("/api/v1/signin", async (req, res) => {
         },
       }
     );
+
+
     if (response.status === 200) {
-      //somehow display this as the users public key
-      const publicKey = response.data.publicKey;
+      const publicKey = response.data.publicKey.aggregatedPublicKey;
       res.json({
         token,
         message: "signin successful",
