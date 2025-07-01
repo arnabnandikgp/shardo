@@ -116,6 +116,32 @@ app.post("/api/v1/signin", async (req, res) => {
   }
 });
 
+app.get("/api/v1/get-payment-info", async(req, res)=>{
+
+  try{
+  const publicKey = req.query.publicKey;
+   
+  const resp = await axios.post('https://api.devnet.solana.com', {
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'getBalance',
+    params: [publicKey]
+  }, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  const lamports = resp.data.result.value;
+  const costInSol = lamports / 1000000000;
+
+  res.json({
+    message: "Payment info fetched successfully",
+    costInSol
+  })}catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
   try {
     const recipientAddress = req.body.recipient;
