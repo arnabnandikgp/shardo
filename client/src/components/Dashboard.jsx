@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -29,6 +29,9 @@ function Dashboard() {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [balance, setBalance] = useState(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [balanceError, setBalanceError] = useState("");
 
   const handleLogout = () => {
     logout();
@@ -62,8 +65,8 @@ function Dashboard() {
       setRecipientAddress("");
       setAmount("");
       alert("Transaction sent successfully!");
-    } catch (err) {
-      throw new Error(err.message || "Failed to send transaction");
+    } catch {
+      throw new Error("Failed to send transaction");
     }
   };
 
@@ -79,12 +82,34 @@ function Dashboard() {
       }
 
       await sendSol(amountInSol);
-    } catch (err) {
-      setError(err.message || "Failed to send transaction");
+    } catch {
+      setError("Failed to send transaction");
     } finally {
       setLoading(false);
     }
   };
+
+  // Fetch balance function
+  const fetchBalance = async () => {
+    if (!user || !user.publicKey) return;
+    setBalanceLoading(true);
+    setBalanceError("");
+    try {
+      const res = await axios.get("http://localhost:3000/api/v1/get-payment-info", {
+        params: { publicKey: user.publicKey },
+      });
+      setBalance(res.data.costInSol ?? 0);
+    } catch (err) {
+      setBalanceError(err.message || "Failed to fetch balance");
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBalance();
+    // eslint-disable-next-line
+  }, [user && user.publicKey]);
 
   return (
     <div style={{ minHeight: '100vh', minWidth: '100vw', width: '100%', height: '100%', background: 'radial-gradient(circle at 60% 40%, #2d0036 0%, #18181b 100%)', color: '#fff', display: 'flex', flexDirection: 'column' }}>
@@ -151,6 +176,52 @@ function Dashboard() {
                 to learn more.
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* Balance Field - Top Left */}
+      {user && user.publicKey && (
+        <div style={{
+          position: 'absolute',
+          top: 90,
+          left: 48,
+          zIndex: 20,
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.7rem',
+            background: 'rgba(24,24,27,0.97)',
+            borderRadius: '1rem',
+            padding: '0.5rem 1.2rem 0.5rem 1.1rem',
+            boxShadow: '0 0 16px #a259ff44',
+            fontSize: '1.35rem',
+            color: '#fff',
+            minWidth: 220,
+            fontFamily: 'monospace',
+            fontWeight: 500,
+          }}>
+            <span style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '1.25rem', color: '#fff', marginRight: 8 }}>balance</span>
+            <div style={{ width: 2, height: 28, background: '#444', margin: '0 10px 0 0', borderRadius: 2 }} />
+            <span style={{ fontFamily: 'monospace', fontSize: '1.35rem', color: '#fff', minWidth: 80, textAlign: 'right', display: 'inline-block', fontWeight: 700 }}>
+              {balanceLoading ? '...' : balanceError ? 'Err' : balance !== null ? balance : '--'}
+            </span>
+            <span style={{ fontSize: '1.3rem', color: '#fff', marginLeft: 2, marginRight: 2, fontWeight: 600 }}>◎</span>
+            <button onClick={fetchBalance} style={{
+              background: 'none',
+              border: 'none',
+              marginLeft: 6,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              padding: 0,
+              outline: 'none',
+            }} title="Refresh Balance">
+              {/* Modern refresh SVG icon */}
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.05 11a9 9 0 1 1 2.13 5.66"/><polyline points="4 19 4 11 12 11"/></svg>
+            </button>
           </div>
         </div>
       )}
