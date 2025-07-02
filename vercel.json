@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "api/server/index.js": { "runtime": "nodejs18.x" },
+    "api/mpc-server-1/index.js": { "runtime": "nodejs18.x" },
+    "api/mpc-server-3/index.js": { "runtime": "nodejs18.x" }
+  },
+  "routes": [
+    { "src": "/api/server/(.*)", "dest": "/server/api/index.js" },
+    { "src": "/api/mpc-server-1/(.*)", "dest": "/mpc-server-1/api/index.js" },
+    { "src": "/api/mpc-server-3/(.*)", "dest": "/mpc-server-3/api/index.js" }
+  ]
+} 

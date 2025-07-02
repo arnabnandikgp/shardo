@@ -99,7 +99,9 @@ app.get("/mpc3/v1/sign-txn", authenticateToken, async (req, res, next) => {
 });
 
 app.use(errorHandler);
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server started on port ${PORT}`);
+// });
+
+export default app;
 
