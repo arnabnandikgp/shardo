@@ -6,6 +6,11 @@ import { z } from "zod";
 import axios from "axios";
 import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
 import bcrypt from "bcryptjs";
+import {
+  aggregateKeys,
+  aggregateSignaturesAndBroadcast,
+  recentBlockHash,
+} from '/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js'; // Adjust the import path as needed
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,6 +83,91 @@ app.post("/api/v1/signup", async (req, res, next) => {
   }
 });
 
+// Helper to get public keys
+async function getPublicKeysHelper(token, username) {
+  const res1 = await axios.get(
+    "http://localhost:4000/mpc1/v1/get-keys",
+    {
+      params: { username },
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+  const res2 = await axios.get(
+    "http://localhost:6000/mpc3/v1/get-keys",
+    {
+      params: { username },
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+  const combinedPublicKey = await aggregateKeys(res1.data.publicKey, res2.data.publicKey);
+  return {
+    success: true,
+    publicKey: combinedPublicKey,
+    message: "This is the combined public key",
+  };
+}
+
+// Helper to sign transaction
+async function signTxnHelper(token, recipientAddress, amount) {
+  const publicResp1 = await axios.get("http://localhost:4000/mpc1/v1/send-public-info",
+    {
+      headers: {
+         authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  const publicShare1 = publicResp1.data.publicShare;
+  const publicKey1 = publicResp1.data.publicKey;
+  const publicResp2 = await axios.get("http://localhost:6000/mpc3/v1/send-public-info",
+    {
+      headers: {
+         authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  const publicShare2 = publicResp2.data.publicShare;
+  const publicKey2 = publicResp2.data.publicKey;
+  const blockhash = await recentBlockHash("devnet");
+  const sigmpc1 = await axios.get("http://localhost:4000/mpc1/v1/sign-txn",
+    {
+      params: {
+        recipient: recipientAddress,
+        amount: amount,
+        recentBlockHash: blockhash.blockHash,
+        otherPublicKey: publicKey2,
+        otherPublicShare: publicShare2
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  const sigmpc2 = await  axios.get("http://localhost:6000/mpc3/v1/sign-txn", 
+    {
+    params: {      
+      recipient: recipientAddress,
+      amount: amount,
+      recentBlockHash: blockhash.blockHash,
+      otherPublicKey: publicKey1,
+      otherPublicShare: publicShare1
+    },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  const {output} = await aggregateSignaturesAndBroadcast({
+    to : recipientAddress,
+    amount: amount,
+    keys: [publicKey1, publicKey2],
+    recentBlockHash: blockhash.blockHash,
+    signatures: [sigmpc1.data.sig, sigmpc2.data.sig],
+  });
+  return {
+    success: true,
+    txn_details: output,
+    message: "Transaction signed and sent successfully",
+  };
+}
+
 app.post("/api/v1/signin", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -94,23 +184,17 @@ app.post("/api/v1/signin", async (req, res) => {
       JWT_SECRET
     );
 
-    const response = await axios.get(
-      "http://localhost:9000/services/v1/get-public-keys",
-      {
-        headers: {
-           authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-
-    if (response.status === 200) {
-      const publicKey = response.data.publicKey.aggregatedPublicKey;
+    // Use helper instead of axios to localhost
+    const publicKeyResult = await getPublicKeysHelper(token, username);
+    if (publicKeyResult && publicKeyResult.publicKey && publicKeyResult.publicKey.aggregatedPublicKey) {
+      const publicKey = publicKeyResult.publicKey.aggregatedPublicKey;
       res.json({
         token,
         message: "signin successful",
         publicKey,
       });
+    } else {
+      res.status(500).json({ message: "Failed to get public key" });
     }
   } else {
     res.json({
@@ -151,28 +235,17 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
     const amount = req.body.amount;
     const token = req.token;
 
-    const response = await axios.get(
-      "http://localhost:9000/services/v1/sign-txn",
-      { 
-        params: {
-          recipient: recipientAddress, 
-          amount: amount 
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (response.status === 200) {
+    // Use helper instead of axios to localhost
+    const result = await signTxnHelper(token, recipientAddress, amount);
+    if (result && result.txn_details) {
       res.json({
         success: true,
-        signature: response.data.txn_details,
+        signature: result.txn_details,
         message: "Transaction signed and sent successfully",
       });
+    } else {
+      res.status(500).json({ message: "Failed to sign transaction" });
     }
-
-    // TODO: Add logic to index the transaction request and store it
   } catch (error) {
     next(error);
   }
@@ -184,4 +257,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-export default app;
+// export default app;
