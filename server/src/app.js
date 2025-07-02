@@ -5,6 +5,7 @@ import cors from "cors";
 import { z } from "zod";
 import axios from "axios";
 import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
+import bcrypt from "bcryptjs";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -50,10 +51,13 @@ app.post("/api/v1/signup", async (req, res, next) => {
         error: "Username already exists",
       });
     }
-     
+
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+
     await userModel.create({
       username: validatedData.username,
-      password: validatedData.password,
+      password: hashedPassword,
     });
 
     const data = {
@@ -80,10 +84,9 @@ app.post("/api/v1/signin", async (req, res) => {
 
   const user = await userModel.findOne({
     username: username,
-    password: password,
   });
 
-  if (user) {
+  if (user && await bcrypt.compare(password, user.password)) {
     const token = jwt.sign(
       {
         id: user,
