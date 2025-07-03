@@ -11,12 +11,13 @@ import {
   aggregateSignaturesAndBroadcast,
   recentBlockHash,
 } from '/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js'; // Adjust the import path as needed
+import { Connection, LAMPORTS_PER_SOL, PublicKey, } from "@solana/web3.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "123456";
 
-
+const connection = new Connection("https://api.devnet.solana.com", "confirmed");
 // Validation schemas
 const signupSchema = z.object({
   username: z
@@ -206,20 +207,10 @@ app.post("/api/v1/signin", async (req, res) => {
 app.get("/api/v1/get-payment-info", async(req, res)=>{
 
   try{
-  const publicKey = req.query.publicKey;
-   
-  const resp = await axios.post('https://api.devnet.solana.com', {
-    jsonrpc: '2.0',
-    id: 1,
-    method: 'getBalance',
-    params: [publicKey]
-  }, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-  const lamports = resp.data.result.value;
-  const costInSol = lamports / 1000000000;
+  const publicKeystr = req.query.publicKey;
+  const publicKey = new PublicKey(publicKeystr);
+  let lamports = await connection.getBalance(publicKey);
+  const costInSol = lamports / LAMPORTS_PER_SOL;
 
   res.json({
     message: "Payment info fetched successfully",
@@ -247,6 +238,34 @@ app.post("/api/v1/txn/sign", authenticateToken, async (req, res, next) => {
       res.status(500).json({ message: "Failed to sign transaction" });
     }
   } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/v1/get-airdrop", async(req, res, next)=>{
+  try{
+
+    const publicKeyStr = req.body.publicKey;
+    const amount = req.body.amount;
+
+    const publicKey = new PublicKey(publicKeyStr);
+    const airdropSignature = await connection.requestAirdrop(
+        publicKey,
+        amount* LAMPORTS_PER_SOL
+      );
+    const latestBlockHash = await connection.getLatestBlockhash();
+
+    await connection.confirmTransaction({
+        blockhash: latestBlockHash.blockhash,
+        lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+        signature: airdropSignature,
+      });
+
+    res.json({
+      message: "Airdrop fetched successfully",
+    })
+}catch (error) {
+    console.log(error);
     next(error);
   }
 });

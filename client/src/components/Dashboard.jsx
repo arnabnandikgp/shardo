@@ -323,6 +323,12 @@ function Dashboard() {
                       Logout
                     </button>
                   </div>
+                  {/* Airdrop link below buttons */}
+                  <div style={{ marginTop: '1.2rem', fontSize: '0.95rem', textAlign: 'center' }}>
+                    <Link to="/airdrop" style={{ textDecoration: 'underline', color: '#a259ff', cursor: 'pointer', fontSize: '0.92rem' }}>
+                      want to airdrop urself some solana?
+                    </Link>
+                  </div>
                 </form>
               </div>
             </div>

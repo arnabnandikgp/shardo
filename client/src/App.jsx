@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './components/LandingPage';
 import Header from './components/Header';
+import Airdrop from './components/Airdrop';
 
 function App() {
   return (
@@ -22,6 +23,17 @@ function App() {
                 <div style={{ minHeight: '100vh', background: 'radial-gradient(circle at 60% 40%, #2d0036 0%, #18181b 100%)', color: '#fff' }}>
                   <Header />
                   <Dashboard />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/airdrop"
+            element={
+              <ProtectedRoute>
+                <div style={{ minHeight: '100vh', background: 'radial-gradient(circle at 60% 40%, #2d0036 0%, #18181b 100%)', color: '#fff' }}>
+                  <Header />
+                  <Airdrop />
                 </div>
               </ProtectedRoute>
             }
