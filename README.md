@@ -1,43 +1,20 @@
 # Shardo - Solana Transaction Manager
 
-A full-stack web application for managing Solana transactions with secure authentication and advanced private key management using Threshold Signature Scheme (TSS).
+A full-stack web application for managing Solana transactions with secure authentication and advanced private key management using distributed MPC-TSS (Multi-Party Computation Threshold Signature Scheme). Shardo's core USP is its robust, offchain, collaborative signing process—private keys are never fully reconstructed or stored in one place, ensuring maximum security.
 
-## Key Features
+## Demo
 
-- 🔐 **Secure Authentication System**
-  - User registration with username/password
-  - JWT-based authentication
-  - Protected routes
-  - Secure session management
-
-- 💰 **Solana Transaction Management**
-  - Send SOL to any Solana address
-  - Real-time transaction status
-  - Transaction signing with TSS (Threshold Signature Scheme)
-  - Devnet integration for testing
-
-- 🛡️ **Security Features**
-  - Password validation with strong requirements
-  - JWT token-based authentication
-  - Secure, distributed private key management (no single point of compromise)
-  - Protected API endpoints
-
-- 🔗 **Threshold Signature Scheme (TSS) Integration**
-  - Utilizes an open-source Rust implementation of TSS for Solana (via the `solana-tss` CLI)
-  - Private keys are never fully reconstructed or stored in one place
-  - All signing operations are performed using MPC (Multi-Party Computation) flows
-  - Node.js utilities wrap the Rust CLI for seamless integration
-  - Enables secure, non-custodial, and collaborative signing for transactions
-
-- 🎨 **Modern UI/UX**
-  - Clean and responsive design
-  - Loading states and error handling
-  - Intuitive transaction flow
-  - User-friendly forms
-
-- **Ready for advanced custody and compliance scenarios.**
+[![Watch the demo](PLACEHOLDER_FOR_DEMO_THUMBNAIL)](PLACEHOLDER_FOR_DEMO_VIDEO_URL)
 
 ---
+
+## Key Features
+- Secure user authentication (JWT, strong password requirements)
+- **Advanced private key management using distributed MPC-TSS**: All signing operations require collaboration between multiple servers, and private keys are never fully reconstructed or exposed
+- Send SOL to any Solana address with real-time status
+- Transaction signing using distributed MPC (n-of-n offchain multisig)
+- Modern, responsive UI/UX
+- Devnet integration for safe testing
 
 ## System Architecture
 
