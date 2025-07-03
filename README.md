@@ -106,7 +106,7 @@ Below are diagrams illustrating the architecture and flow of the Shardo Solana T
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd cloud-app
+cd shardo
 ```
 
 2. Install dependencies for both frontend and backend:
@@ -152,6 +152,32 @@ The application should now be running at:
 - Frontend: http://localhost:5173
 - Backend: http://localhost:3000
 
+---
+
+## Running the MPC Servers
+
+Shardo uses two MPC servers to simulate distributed key management and collaborative signing. Each server holds a share of the private key and must participate in every signing operation (n-of-n scheme).
+
+To start both MPC servers, open two separate terminal windows/tabs and run:
+
+### Start MPC Server 1
+```bash
+cd mpc-server-1
+npm install # if not already done
+npm start
+```
+
+### Start MPC Server 2 (mpc-server-3)
+```bash
+cd mpc-server-3
+npm install # if not already done
+npm start
+```
+
+Both servers will listen for signing requests from the wallet backend and communicate as part of the offchain multisignature process. If either server is down, transaction signing will not proceed.
+
+---
+
 ## Usage
 
 1. Register a new account at `/signup`
@@ -173,25 +199,50 @@ The application should now be running at:
 
 ### Project Structure
 ```
-cloud-app/
-├── backend/
-│   ├── index.js
-│   ├── models.js
-│   └── package.json
+shardo/
 ├── client/
+│   ├── public/
 │   ├── src/
+│   │   ├── assets/
 │   │   ├── components/
+│   │   ├── content/
 │   │   ├── context/
-│   │   └── App.jsx
-│   └── package.json
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   └── main.jsx
+│   ├── package.json
+│   └── ...
+├── server/
+│   ├── src/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── services/
+│   │   └── app.js
+│   ├── package.json
+│   └── ...
+├── mpc-server-1/
+│   ├── index.js
+│   ├── middleware/
+│   ├── models/
+│   ├── package.json
+│   └── ...
+├── mpc-server-3/
+│   ├── index.js
+│   ├── middleware/
+│   ├── models/
+│   ├── package.json
+│   └── ...
 ├── utilities/
 │   ├── src/
+│   │   ├── commands/
+│   │   ├── core/
 │   │   ├── services/
-│   │   │   └── tss-service.ts
-│   │   └── types/
-│   │       └── cli.ts
-│   └── package.json
-└── README.md
+│   │   ├── types/
+│   ├── package.json
+│   └── ...
+├── README.md
+├── package.json
+└── ...
 ```
 
 ## About the TSS Implementation: n-of-n Offchain Multisignature
