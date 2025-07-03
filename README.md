@@ -35,6 +35,24 @@ A full-stack web application for managing Solana transactions with secure authen
   - Intuitive transaction flow
   - User-friendly forms
 
+- **Ready for advanced custody and compliance scenarios.**
+
+---
+
+## System Architecture
+
+Below are diagrams illustrating the architecture and flow of the Shardo Solana Transaction Manager:
+
+### Full Signing Flow
+
+![Full Signing Flow](client/public/final_shardo_logo.jpg)
+
+### Key Management Overview
+
+![Key Management Overview](client/public/shardo_og_gemini_svg.svg)
+
+---
+
 ## Tech Stack
 
 ### Frontend
@@ -175,12 +193,14 @@ cloud-app/
 └── README.md
 ```
 
-## Why TSS/MPC?
-- **No single point of compromise:** Private keys are never fully reconstructed or stored in one place.
-- **Collaborative signing:** Multiple parties (or services) can participate in transaction signing.
-- **Open-source and auditable:** Uses a community-driven Rust implementation for Solana.
-- **Ready for advanced custody and compliance scenarios.**
+## About the TSS Implementation: n-of-n Offchain Multisignature
 
----
+While Shardo uses a distributed signing process inspired by Threshold Signature Schemes (TSS), it is important to clarify that the current implementation is an **n-of-n offchain multisignature** system, not a true TSS.
 
-For more details on the TSS flows and CLI usage, see the `utilities/src/services/tss-service.ts` and the upstream Solana TSS CLI documentation.
+- **n-of-n Offchain Multisig:** All `n` MPC servers must participate in every signing operation. If any server is unavailable, the signature cannot be produced. The private key is never reconstructed, and all signing is done collaboratively offchain.
+- **True TSS:** In a true `(t, n)` TSS, any `t` out of `n` parties can produce a valid signature, providing fault tolerance and flexibility. The private key is never reconstructed, and no single party ever has access to the full key.
+
+**Summary:**  
+Shardo's approach increases security by distributing key shares and requiring all parties to cooperate, but it does not provide the threshold flexibility of a true TSS. This is sometimes called "n-of-n TSS" or "offchain multisig," and is a strong security model, but not a full threshold scheme.
+
+For more details, see the [solana-tss documentation](https://github.com/your-solana-tss-repo) and the `utilities/src/services/tss-service.ts` file.
