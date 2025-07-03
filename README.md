@@ -43,13 +43,14 @@ A full-stack web application for managing Solana transactions with secure authen
 
 Below are diagrams illustrating the architecture and flow of the Shardo Solana Transaction Manager:
 
-### Full Signing Flow
-
-![Full Signing Flow](client/public/final_shardo_logo.jpg)
 
 ### Key Management Overview
 
-![Key Management Overview](client/public/shardo_og_gemini_svg.svg)
+![Key Generation and Management Overview](client/src/assets/mpc-setup.png)
+
+### Full Signing Flow
+
+![Full Signing and Signature aggregation Flow](client/src/assets/mpc-signing.png)
 
 ---
 
