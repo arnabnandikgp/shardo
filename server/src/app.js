@@ -4,13 +4,13 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import { z } from "zod";
 import axios from "axios";
-import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
+import { authenticateToken, errorHandler } from "./middleware/index.js";
 import bcrypt from "bcryptjs";
 import {
   aggregateKeys,
   aggregateSignaturesAndBroadcast,
   recentBlockHash,
-} from '/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js'; // Adjust the import path as needed
+} from '../../utilities/dist/services/tss-service.js'; // Adjust the import path as needed
 import { Connection, LAMPORTS_PER_SOL, PublicKey, } from "@solana/web3.js";
 
 const app = express();

@@ -1,11 +1,11 @@
-import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-3/models/models.js";
+import { userModel } from "./models/models.js";
 import express from "express";
-import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/mpc-server-3/middleware/index.js";
+import { authenticateToken, errorHandler } from "./middleware/index.js";
 import {
   aggSendStepOne,
   aggSendStepTwo,
   generateShares,
-} from "/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js";
+} from "../utilities/dist/services/tss-service.js";
 import cors from "cors";
 
 const app = express();
