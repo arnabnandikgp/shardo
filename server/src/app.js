@@ -17,7 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "123456";
 
-const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+const connection = new Connection("https://solana-devnet.g.alchemy.com/v2/hFcItZcCi7sBqEK3tddTpMWbfSzpm6ae", "confirmed");
 // Validation schemas
 const signupSchema = z.object({
   username: z

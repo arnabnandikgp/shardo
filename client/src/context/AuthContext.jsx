@@ -29,6 +29,20 @@ export const AuthProvider = ({ children }) => {
       });
       return response.data;
     } catch (error) {
+      // Check for Zod validation error details
+      if (error.response?.data?.details && Array.isArray(error.response.data.details)) {
+        // Find the first password-related error if present
+        const passwordError = error.response.data.details.find(
+          (err) => err.path && err.path.includes('password') && err.message
+        );
+        if (passwordError) {
+          throw new Error(passwordError.message);
+        }
+        // Otherwise, show the first validation error
+        if (error.response.data.details[0]?.message) {
+          throw new Error(error.response.data.details[0].message);
+        }
+      }
       throw new Error(error.response?.data?.error || 'Signup failed');
     }
   };
