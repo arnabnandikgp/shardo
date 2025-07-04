@@ -69,7 +69,7 @@ Below are diagrams illustrating the architecture and flow of the Shardo Solana T
 
 1. Clone the open-source Solana TSS implementation:
    ```bash
-   git clone <solana-tss-repo-url>
+   git clone https://github.com/ZenGo-X/solana-tss.git
    cd solana-tss
    cargo build --release
    cp target/release/solana-tss /usr/local/bin/
