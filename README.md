@@ -4,7 +4,7 @@ A full-stack web application for managing Solana transactions with secure authen
 
 ## Demo
 
-[![Watch the demo]](demo_shardo.mov)
+[![Watch the demo]](https://www.youtube.com/watch?v=V6AOTw1A7yI&ab_channel=seriousperson)
 
 ---
 
