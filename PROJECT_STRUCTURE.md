@@ -12,7 +12,7 @@ The architecture consists of four main, independently-run services:
 
 ## Proposed Directory Structure
 ```
-bonkbot_clone/
+shardo/
 ├── .git/
 ├── server/                     # Main backend (Node.js/Express)
 │   ├── src/

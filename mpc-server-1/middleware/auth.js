@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { userModel } from "/Users/arnabnandi/bonkbot_clone/mpc-server-1/models/models.js";
+import { userModel } from "/Users/arnabnandi/shardo/mpc-server-1/models/models.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "123456";
 

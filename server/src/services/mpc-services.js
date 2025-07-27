@@ -4,8 +4,8 @@ import {
   aggregateKeys,
   aggregateSignaturesAndBroadcast,
   recentBlockHash,
-} from '/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js'; // Adjust the import path as needed
-import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
+} from '/Users/arnabnandi/shardo/utilities/dist/services/tss-service.js'; // Adjust the import path as needed
+import { authenticateToken, errorHandler } from "/Users/arnabnandi/shardo/server/src/middleware/index.js";
 
 const appservice = express();
 const PORT = process.env.PORT || 9000;
