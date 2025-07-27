@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import { z } from "zod";
 import axios from "axios";
-import { authenticateToken, errorHandler } from "/Users/arnabnandi/shardo/server/src/middleware/index.js";
+import { authenticateToken, errorHandler } from "./middleware/index.js";
 import bcrypt from "bcryptjs";
 
 const app = express();
