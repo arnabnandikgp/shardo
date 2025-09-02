@@ -23,7 +23,7 @@ COPY . .
 
 # Your app binds to port 3000, 4000, or 6000
 # Replace 3000 with the correct port for each specific server
-EXPOSE 3000 
+EXPOSE 6000 
 
 # Define the command to run your app
 CMD [ "npm", "run", "dev" ]
