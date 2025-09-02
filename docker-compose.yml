@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:latest # Use the official MongoDB image
+    ports:
+      - "27017:27017" # Map to host for direct access with tools like MongoDB Compass
+    volumes:
+      - mongo-data:/data/db # Persist database data
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=myuser
+      - MONGO_INITDB_ROOT_PASSWORD=mypassword
+
+  # Frontend Client Service
+  client:
+    build: ./client
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+
+  # Main Backend Server
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      MPC_SERVER_1_URL: http://mpc-server-1:4000
+      MPC_SERVER_2_URL: http://mpc-server-2:6000
+      MONGODB_URI: mongodb://myuser:mypassword@mongodb:27017/main_db?authSource=admin
+    depends_on:
+      - mongodb      # <-- Wait for mongodb to be ready
+      - mpc-server-1
+      - mpc-server-2
+
+  # MPC Server 1
+  mpc-server-1:
+    build: ./mpc-server-1
+    environment:
+      MONGODB_URI: mongodb://myuser:mypassword@mongodb:27017/mpc1_db?authSource=admin
+    depends_on:
+      - mongodb      # <-- Wait for mongodb to be ready
+
+  # MPC Server 2
+  mpc-server-2:
+    build: ./mpc-server-2
+    environment:
+      MONGODB_URI: mongodb://myuser:mypassword@mongodb:27017/mpc2_db?authSource=admin
+    depends_on:
+      - mongodb      # <-- Wait for mongodb to be ready
+
+# Define the named volume for data persistence
+volumes:
+  mongo-data:
