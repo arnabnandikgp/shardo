@@ -14,6 +14,11 @@ const PORT = process.env.PORT || 6000;
 app.use(express.json());
 app.use(cors());
 
+// Health check endpoint for Docker
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", service: "mpc-server-2" });
+});
+
 
 app.post("/mpc3/v1/initialize", async (req, res, next) => {
   try {

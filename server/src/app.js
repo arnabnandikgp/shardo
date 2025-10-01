@@ -4,17 +4,19 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import { z } from "zod";
 import axios from "axios";
-import { authenticateToken, errorHandler } from "/Users/arnabnandi/bonkbot_clone/server/src/middleware/index.js";
+import { authenticateToken, errorHandler } from "./middleware/index.js";
 import bcrypt from "bcryptjs";
 import {
   aggregateKeys,
   aggregateSignaturesAndBroadcast,
   recentBlockHash,
-} from '/Users/arnabnandi/bonkbot_clone/utilities/dist/services/tss-service.js'; // Adjust the import path as needed
+} from '../../utilities/dist/services/tss-service.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "123456";
+const MPC_SERVER_1_URL = process.env.MPC_SERVER_1_URL || "http://localhost:4000";
+const MPC_SERVER_2_URL = process.env.MPC_SERVER_2_URL || "http://localhost:6000";
 
 
 // Validation schemas
@@ -41,6 +43,11 @@ const signupSchema = z.object({
 
 app.use(express.json());
 app.use(cors());
+
+// Health check endpoint for Docker
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", service: "main-server" });
+});
 
 app.post("/api/v1/signup", async (req, res, next) => {
   try {
@@ -71,8 +78,8 @@ app.post("/api/v1/signup", async (req, res, next) => {
       username: validatedData.username,
     };
 
-    const response1 = await axios.post("http://localhost:4000/mpc1/v1/initialize", data);
-    const response2 = await axios.post("http://localhost:6000/mpc3/v1/initialize", data);
+    const response1 = await axios.post(`${MPC_SERVER_1_URL}/mpc1/v1/initialize`, data);
+    const response2 = await axios.post(`${MPC_SERVER_2_URL}/mpc3/v1/initialize`, data);
 
     if (response1.status === 201 && response2.status === 201) {
       res.status(201).json({
@@ -88,14 +95,14 @@ app.post("/api/v1/signup", async (req, res, next) => {
 // Helper to get public keys
 async function getPublicKeysHelper(token, username) {
   const res1 = await axios.get(
-    "http://localhost:4000/mpc1/v1/get-keys",
+    `${MPC_SERVER_1_URL}/mpc1/v1/get-keys`,
     {
       params: { username },
       headers: { Authorization: `Bearer ${token}` }
     }
   );
   const res2 = await axios.get(
-    "http://localhost:6000/mpc3/v1/get-keys",
+    `${MPC_SERVER_2_URL}/mpc3/v1/get-keys`,
     {
       params: { username },
       headers: { Authorization: `Bearer ${token}` }
@@ -111,7 +118,7 @@ async function getPublicKeysHelper(token, username) {
 
 // Helper to sign transaction
 async function signTxnHelper(token, recipientAddress, amount) {
-  const publicResp1 = await axios.get("http://localhost:4000/mpc1/v1/send-public-info",
+  const publicResp1 = await axios.get(`${MPC_SERVER_1_URL}/mpc1/v1/send-public-info`,
     {
       headers: {
          authorization: `Bearer ${token}`,
@@ -120,7 +127,7 @@ async function signTxnHelper(token, recipientAddress, amount) {
   );
   const publicShare1 = publicResp1.data.publicShare;
   const publicKey1 = publicResp1.data.publicKey;
-  const publicResp2 = await axios.get("http://localhost:6000/mpc3/v1/send-public-info",
+  const publicResp2 = await axios.get(`${MPC_SERVER_2_URL}/mpc3/v1/send-public-info`,
     {
       headers: {
          authorization: `Bearer ${token}`,
@@ -130,7 +137,7 @@ async function signTxnHelper(token, recipientAddress, amount) {
   const publicShare2 = publicResp2.data.publicShare;
   const publicKey2 = publicResp2.data.publicKey;
   const blockhash = await recentBlockHash("devnet");
-  const sigmpc1 = await axios.get("http://localhost:4000/mpc1/v1/sign-txn",
+  const sigmpc1 = await axios.get(`${MPC_SERVER_1_URL}/mpc1/v1/sign-txn`,
     {
       params: {
         recipient: recipientAddress,
@@ -143,7 +150,7 @@ async function signTxnHelper(token, recipientAddress, amount) {
         Authorization: `Bearer ${token}`,
       },
     })
-  const sigmpc2 = await  axios.get("http://localhost:6000/mpc3/v1/sign-txn", 
+  const sigmpc2 = await  axios.get(`${MPC_SERVER_2_URL}/mpc3/v1/sign-txn`, 
     {
     params: {      
       recipient: recipientAddress,

@@ -10,7 +10,9 @@ A full-stack web application for managing Solana transactions with secure authen
 - 🔗 Threshold Signature Scheme (TSS) integration
 - 🎨 Modern React UI with Tailwind CSS
 
-## Quick Start with Docker
+## Quick Start (Local Development)
+
+⚠️ **Note**: Docker Compose is currently experiencing issues. Please use local development setup instead.
 
 1. **Clone the repository:**
    ```bash
@@ -18,22 +20,56 @@ A full-stack web application for managing Solana transactions with secure authen
    cd shardo
    ```
 
-2. **Start all services:**
+2. **Install dependencies for all services:**
    ```bash
-   docker-compose up --build
+   # Install dependencies for each service
+   cd server && npm install && cd ..
+   cd mpc-server-1 && npm install && cd ..
+   cd mpc-server-2 && npm install && cd ..
+   cd client && npm install && cd ..
    ```
 
-3. **Access the application:**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:3000
-   - MongoDB: localhost:27017
+3. **Start MongoDB locally:**
+   ```bash
+   # Make sure MongoDB is running on your system
+   # Default connection: mongodb://localhost:27017
+   ```
 
-That's it! The application will automatically:
-- Set up MongoDB with authentication
-- Build and start the React frontend
-- Start the main backend server
-- Initialize two MPC servers for distributed signing
-- Configure all inter-service communication
+4. **Start all services in separate terminals:**
+   
+   **Terminal 1 - Main Server:**
+   ```bash
+   cd server
+   npm run dev
+   ```
+   
+   **Terminal 2 - MPC Server 1:**
+   ```bash
+   cd mpc-server-1
+   npm run dev
+   ```
+   
+   **Terminal 3 - MPC Server 2:**
+   ```bash
+   cd mpc-server-2
+   npm run dev
+   ```
+   
+   **Terminal 4 - Client:**
+   ```bash
+   cd client
+   npm run dev
+   ```
+
+5. **Access the application:**
+   - Frontend: http://localhost:5173
+   - Main Server: http://localhost:3000
+   - MPC Server 1: http://localhost:4000
+   - MPC Server 2: http://localhost:6000
+
+## Alternative: Docker Setup (Currently Having Issues)
+
+If you prefer to use Docker (when issues are resolved), see [DOCKER_SETUP.md](./DOCKER_SETUP.md) for instructions.
 
 ## Usage
 
@@ -55,14 +91,26 @@ shardo/
 └── docker-compose.yml
 ```
 
-## Development
+## Environment Variables
 
-To run in development mode without Docker:
+For local development, you may need to set these environment variables (or they will use defaults):
 
-1. Install dependencies: `npm install` in each directory
-2. Start MongoDB locally
-3. Set environment variables (see docker-compose.yml for reference)
-4. Run each service: `npm run dev`
+### Main Server (./server)
+- `PORT`: 3000 (default)
+- `MPC_SERVER_1_URL`: http://localhost:4000
+- `MPC_SERVER_2_URL`: http://localhost:6000
+- `MONGODB_URI`: mongodb://localhost:27017/cloudapp
+- `JWT_SECRET`: "123456"
+
+### MPC Server 1 (./mpc-server-1)
+- `PORT`: 4000 (default)
+- `MONGODB_URI`: mongodb://localhost:27017/mpc1
+- `JWT_SECRET`: "123456"
+
+### MPC Server 2 (./mpc-server-2)
+- `PORT`: 6000 (default)
+- `MONGODB_URI`: mongodb://localhost:27017/mpc3
+- `JWT_SECRET`: "123456"
 
 ## API Endpoints
 

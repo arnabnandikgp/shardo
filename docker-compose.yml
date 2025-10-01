@@ -3,53 +3,130 @@ version: '3.8'
 services:
   # MongoDB Database Service
   mongodb:
-    image: mongo:latest # Use the official MongoDB image
+    image: mongo:latest
+    container_name: shardo-mongodb
     ports:
-      - "27017:27017" # Map to host for direct access with tools like MongoDB Compass
+      - "27017:27017"
     volumes:
-      - mongo-data:/data/db # Persist database data
+      - mongo-data:/data/db
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=myuser
-      - MONGO_INITDB_ROOT_PASSWORD=mypassword
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+    networks:
+      - shardo-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # MPC Server 1
+  mpc-server-1:
+    build: 
+      context: .
+      dockerfile: ./mpc-server-1/Dockerfile
+    container_name: shardo-mpc-server-1
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      MONGODB_URI: mongodb://admin:adminpassword@mongodb:27017/mpc1?authSource=admin
+      JWT_SECRET: "123456"
+      NODE_ENV: production
+    volumes:
+      - ./utilities:/usr/src/utilities:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - shardo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  # MPC Server 2
+  mpc-server-2:
+    build:
+      context: .
+      dockerfile: ./mpc-server-2/Dockerfile
+    container_name: shardo-mpc-server-2
+    ports:
+      - "6000:6000"
+    environment:
+      PORT: 6000
+      MONGODB_URI: mongodb://admin:adminpassword@mongodb:27017/mpc3?authSource=admin
+      JWT_SECRET: "123456"
+      NODE_ENV: production
+    volumes:
+      - ./utilities:/usr/src/utilities:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - shardo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:6000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  # Main Backend Server
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    container_name: shardo-server
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      MPC_SERVER_1_URL: http://mpc-server-1:4000
+      MPC_SERVER_2_URL: http://mpc-server-2:6000
+      MONGODB_URI: mongodb://admin:adminpassword@mongodb:27017/cloudapp?authSource=admin
+      JWT_SECRET: "123456"
+      NODE_ENV: production
+    volumes:
+      - ./utilities:/usr/src/utilities:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      mpc-server-1:
+        condition: service_healthy
+      mpc-server-2:
+        condition: service_healthy
+    networks:
+      - shardo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
   # Frontend Client Service
   client:
     build: ./client
+    container_name: shardo-client
     ports:
       - "5173:80"
     depends_on:
-      - server
+      server:
+        condition: service_healthy
+    networks:
+      - shardo-network
+    restart: unless-stopped
 
-  # Main Backend Server
-  server:
-    build: ./server
-    ports:
-      - "3000:3000"
-    environment:
-      MPC_SERVER_1_URL: http://mpc-server-1:4000
-      MPC_SERVER_2_URL: http://mpc-server-2:6000
-      MONGODB_URI: mongodb://myuser:mypassword@mongodb:27017/main_db?authSource=admin
-    depends_on:
-      - mongodb      # <-- Wait for mongodb to be ready
-      - mpc-server-1
-      - mpc-server-2
+networks:
+  shardo-network:
+    driver: bridge
 
-  # MPC Server 1
-  mpc-server-1:
-    build: ./mpc-server-1
-    environment:
-      MONGODB_URI: mongodb://myuser:mypassword@mongodb:27017/mpc1_db?authSource=admin
-    depends_on:
-      - mongodb      # <-- Wait for mongodb to be ready
-
-  # MPC Server 2
-  mpc-server-2:
-    build: ./mpc-server-2
-    environment:
-      MONGODB_URI: mongodb://myuser:mypassword@mongodb:27017/mpc2_db?authSource=admin
-    depends_on:
-      - mongodb      # <-- Wait for mongodb to be ready
-
-# Define the named volume for data persistence
 volumes:
   mongo-data:
