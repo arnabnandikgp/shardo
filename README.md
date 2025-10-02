@@ -109,7 +109,7 @@ For local development, you may need to set these environment variables (or they 
 
 ### MPC Server 2 (./mpc-server-2)
 - `PORT`: 6000 (default)
-- `MONGODB_URI`: mongodb://localhost:27017/mpc3
+- `MONGODB_URI`: mongodb://localhost:27017/mpc2
 - `JWT_SECRET`: "123456"
 
 ## API Endpoints

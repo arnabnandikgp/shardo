@@ -79,7 +79,7 @@ app.post("/api/v1/signup", async (req, res, next) => {
     };
 
     const response1 = await axios.post(`${MPC_SERVER_1_URL}/mpc1/v1/initialize`, data);
-    const response2 = await axios.post(`${MPC_SERVER_2_URL}/mpc3/v1/initialize`, data);
+    const response2 = await axios.post(`${MPC_SERVER_2_URL}/mpc2/v1/initialize`, data);
 
     if (response1.status === 201 && response2.status === 201) {
       res.status(201).json({
@@ -102,7 +102,7 @@ async function getPublicKeysHelper(token, username) {
     }
   );
   const res2 = await axios.get(
-    `${MPC_SERVER_2_URL}/mpc3/v1/get-keys`,
+    `${MPC_SERVER_2_URL}/mpc2/v1/get-keys`,
     {
       params: { username },
       headers: { Authorization: `Bearer ${token}` }
@@ -127,7 +127,7 @@ async function signTxnHelper(token, recipientAddress, amount) {
   );
   const publicShare1 = publicResp1.data.publicShare;
   const publicKey1 = publicResp1.data.publicKey;
-  const publicResp2 = await axios.get(`${MPC_SERVER_2_URL}/mpc3/v1/send-public-info`,
+  const publicResp2 = await axios.get(`${MPC_SERVER_2_URL}/mpc2/v1/send-public-info`,
     {
       headers: {
          authorization: `Bearer ${token}`,
@@ -150,7 +150,7 @@ async function signTxnHelper(token, recipientAddress, amount) {
         Authorization: `Bearer ${token}`,
       },
     })
-  const sigmpc2 = await  axios.get(`${MPC_SERVER_2_URL}/mpc3/v1/sign-txn`, 
+  const sigmpc2 = await  axios.get(`${MPC_SERVER_2_URL}/mpc2/v1/sign-txn`, 
     {
     params: {      
       recipient: recipientAddress,

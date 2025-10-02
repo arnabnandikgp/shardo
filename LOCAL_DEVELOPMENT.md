@@ -107,7 +107,7 @@ JWT_SECRET=123456
 ### MPC Server 2 (./mpc-server-2)
 ```bash
 PORT=6000
-MONGODB_URI=mongodb://localhost:27017/mpc3
+MONGODB_URI=mongodb://localhost:27017/mpc2
 JWT_SECRET=123456
 ```
 
@@ -117,7 +117,7 @@ The application will automatically create the following databases in your local 
 
 - `cloudapp` - Used by the main server
 - `mpc1` - Used by MPC Server 1
-- `mpc3` - Used by MPC Server 2
+- `mpc2` - Used by MPC Server 2
 
 No manual database setup is required - the services will create collections as needed.
 

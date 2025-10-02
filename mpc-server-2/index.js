@@ -20,7 +20,7 @@ app.get("/health", (req, res) => {
 });
 
 
-app.post("/mpc3/v1/initialize", async (req, res, next) => {
+app.post("/mpc2/v1/initialize", async (req, res, next) => {
   try {
     const username  = req.body.username;
     const { secretShare, publicShare } = await generateShares();
@@ -37,7 +37,7 @@ app.post("/mpc3/v1/initialize", async (req, res, next) => {
   }
 });
 
-app.get("/mpc3/v1/get-keys",authenticateToken, async (req, res, next) => {
+app.get("/mpc2/v1/get-keys",authenticateToken, async (req, res, next) => {
   try {
     const username = req.user;
     const user = await userModel.findOne({ username: username });
@@ -50,7 +50,7 @@ app.get("/mpc3/v1/get-keys",authenticateToken, async (req, res, next) => {
   }
 });
 
-app.get("/mpc3/v1/send-public-info", authenticateToken, async (req, res, next) => { 
+app.get("/mpc2/v1/send-public-info", authenticateToken, async (req, res, next) => { 
   try{
     const username = req.user;
     const user = await userModel.findOne({ username: username });
@@ -72,7 +72,7 @@ app.get("/mpc3/v1/send-public-info", authenticateToken, async (req, res, next) =
   }
 });
 
-app.get("/mpc3/v1/sign-txn", authenticateToken, async (req, res, next) => {
+app.get("/mpc2/v1/sign-txn", authenticateToken, async (req, res, next) => {
   try {
     const recipientAddress = req.query.recipient;
     const amount = req.query.amount;

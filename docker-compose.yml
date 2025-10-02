@@ -59,7 +59,7 @@ services:
       - "6000:6000"
     environment:
       PORT: 6000
-      MONGODB_URI: mongodb://admin:adminpassword@mongodb:27017/mpc3?authSource=admin
+      MONGODB_URI: mongodb://admin:adminpassword@mongodb:27017/2?authSource=admin
       JWT_SECRET: "123456"
       NODE_ENV: production
     volumes:

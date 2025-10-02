@@ -33,4 +33,4 @@ RUN mkdir -p /usr/src/utilities
 EXPOSE 4000
 
 # Define the command to run your app
-CMD [ "npm", "run", "dev" ]
+CMD [ "node", "index.js" ]
