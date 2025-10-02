@@ -9,13 +9,14 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: adminpassword
     networks:
       - shardo-network
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test: ["CMD", "mongosh", "--quiet", "-u", "admin", "-p", "adminpassword", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping').ok"]
       interval: 10s
       timeout: 5s
       retries: 5

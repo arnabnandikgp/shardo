@@ -8,7 +8,16 @@ RUN apt-get update && apt-get install -y \
     g++ \
     libusb-dev \
     wget \
+    curl \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Rust 1.65 (compatible with old solana-sdk)
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.65.0
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install solana-tss CLI with locked dependencies
+RUN cargo install --git https://github.com/ZenGo-X/solana-tss.git --locked
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
