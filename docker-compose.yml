@@ -15,11 +15,11 @@ services:
     networks:
       - shardo-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 40s
 
   # MPC Server 1
   mpc-server-1:
@@ -59,7 +59,7 @@ services:
       - "6000:6000"
     environment:
       PORT: 6000
-      MONGODB_URI: mongodb://admin:adminpassword@mongodb:27017/2?authSource=admin
+      MONGODB_URI: mongodb://admin:adminpassword@mongodb:27017/mpc2?authSource=admin
       JWT_SECRET: "123456"
       NODE_ENV: production
     volumes:
